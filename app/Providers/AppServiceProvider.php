@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Providers;
+
+use App\Models\Cliente;
+use App\Models\Empresa;
+use App\Models\User;
+use App\Policies\ClientePolicy;
+use App\Policies\EmpresaPolicy;
+use App\Policies\UserPolicy;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        //
+    }
+
+    public function boot(): void
+    {
+        Gate::policy(Cliente::class, ClientePolicy::class);
+        Gate::policy(Empresa::class, EmpresaPolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
+    }
+}
