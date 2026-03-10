@@ -29,11 +29,14 @@ export default {
         themes: [
             {
                 rvtheme: {
-                    'primary': '#1e3a5f',
-                    'secondary': '#2d6a4f',
-                    'accent': '#e76f51',
-                    'neutral': '#374151',
-                    'base-100': '#f9fafb',
+                    'primary': '#374151',
+                    'secondary': '#4b5563',
+                    'accent': '#6b7280',
+                    'neutral': '#1f2937',
+                    'base-100': '#ffffff',
+                    'base-200': '#f3f4f6',
+                    'base-300': '#e5e7eb',
+                    'base-content': '#111827',
                     'info': '#3b82f6',
                     'success': '#22c55e',
                     'warning': '#f59e0b',

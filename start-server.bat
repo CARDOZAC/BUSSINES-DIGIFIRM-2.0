@@ -1,7 +1,7 @@
 @echo off
-title Digital Clientes R^&V - Servidor
+title DIGIFIRM 2.0 - Sistema de Creación de Clientes
 echo ============================================
-echo   Digital Clientes R^&V - Inicio del Servidor
+echo   DIGIFIRM 2.0 - Sistema de Creación de Clientes
 echo ============================================
 echo.
 

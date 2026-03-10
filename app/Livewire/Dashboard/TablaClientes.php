@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Exports\ClientesExport;
 use App\Models\Cliente;
+use App\Services\ActivityLogService;
 use App\Models\Empresa;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -72,7 +73,9 @@ class TablaClientes extends Component
     public function archivarCliente(int $clienteId): void
     {
         $cliente = Cliente::findOrFail($clienteId);
+        $this->authorize('delete', $cliente);
         $cliente->update(['estado' => 'anulado']);
+        app(ActivityLogService::class)->registrarEliminacion($cliente, "Cliente #{$clienteId} archivado");
         $cliente->delete();
 
         session()->flash('message', "Cliente #{$clienteId} archivado correctamente.");
@@ -80,6 +83,8 @@ class TablaClientes extends Component
 
     public function exportarCsv(): BinaryFileResponse
     {
+        $this->authorize('export', \App\Models\Cliente::class);
+
         $usuario = Auth::user();
 
         $filtros = [
@@ -96,6 +101,8 @@ class TablaClientes extends Component
         }
 
         $nombre = 'clientes_' . now()->format('Y-m-d_His') . '.csv';
+
+        app(ActivityLogService::class)->registrarAccion('exportar', 'clientes', null, 'Exportación CSV de clientes');
 
         return Excel::download(new ClientesExport($filtros), $nombre, \Maatwebsite\Excel\Excel::CSV);
     }
@@ -132,10 +139,17 @@ class TablaClientes extends Component
 
         $totalClientes = (clone $query)->count();
 
+        $empresas = $usuario->esAdminCartera() || $usuario->hasRole('super_admin')
+            ? Empresa::activas()->orderBy('nombre')->get()
+            : Empresa::where('id', $usuario->empresa_id)->get();
+        $vendedores = $usuario->esAdminCartera() || $usuario->hasRole('super_admin')
+            ? User::activos()->orderBy('name')->get()
+            : User::activos()->where('empresa_id', $usuario->empresa_id)->orderBy('name')->get();
+
         return view('livewire.dashboard.tabla-clientes', [
             'clientes' => $query->paginate($this->perPage),
-            'empresas' => Empresa::activas()->orderBy('nombre')->get(),
-            'vendedores' => User::activos()->orderBy('name')->get(),
+            'empresas' => $empresas,
+            'vendedores' => $vendedores,
             'totalClientes' => $totalClientes,
             'esAdmin' => $usuario->esAdminCartera(),
         ])->layout('layouts.app');

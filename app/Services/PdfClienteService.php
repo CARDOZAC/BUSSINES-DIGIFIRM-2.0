@@ -42,10 +42,11 @@ class PdfClienteService
             'default_font_size' => 9,
         ]);
 
-        $mpdf->SetTitle('CTA-FMT-001 - ' . $cliente->nombre_razon_social);
-        $mpdf->SetAuthor('Sistema Digital Clientes R&V');
-        $mpdf->SetCreator('Sistema R&V - mPDF');
-        $mpdf->SetSubject('Formato Creación/Actualización de Cliente');
+        $mpdf->SetTitle('CTA-FMT-001 - Creación o Actualización de Cliente - ' . $cliente->nombre_razon_social);
+        $mpdf->SetAuthor($cliente->empresa->nombre ?? 'Sistema de Creación de Clientes');
+        $mpdf->SetCreator('DIGIFIRM 2.0 - mPDF');
+        $mpdf->SetSubject('Formato CTA-FMT-001 - Creación o Actualización de Cliente');
+        $mpdf->SetKeywords('CTA-FMT-001, cliente, creación, actualización, ' . $cliente->numero_documento);
 
         $mpdf->SetProtection(['print', 'print-highres'], '', null, 128);
 
@@ -62,6 +63,47 @@ class PdfClienteService
         $mpdf->Output($rutaLocal, \Mpdf\Output\Destination::FILE);
 
         return $rutaLocal;
+    }
+
+    /**
+     * Genera el PDF y retorna el contenido como string (evita errores de archivo en Windows).
+     */
+    public function generarPdfComoString(Cliente $cliente): string
+    {
+        $cliente->load(['empresa', 'vendedor']);
+
+        $qrBase64 = $this->generarQrBase64($cliente);
+        $hashVerificacion = $this->generarHash($cliente);
+
+        $html = View::make('pdf.formato-cta-fmt-001', [
+            'cliente' => $cliente,
+            'empresa' => $cliente->empresa,
+            'vendedor' => $cliente->vendedor,
+            'qrBase64' => $qrBase64,
+            'hashVerificacion' => $hashVerificacion,
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'format' => 'Letter',
+            'margin_left' => 8,
+            'margin_right' => 8,
+            'margin_top' => 8,
+            'margin_bottom' => 8,
+            'default_font' => 'Arial',
+            'default_font_size' => 9,
+        ]);
+
+        $mpdf->SetTitle('CTA-FMT-001 - Creación o Actualización de Cliente - ' . $cliente->nombre_razon_social);
+        $mpdf->SetAuthor($cliente->empresa->nombre ?? 'Sistema de Creación de Clientes');
+        $mpdf->SetCreator('DIGIFIRM 2.0 - mPDF');
+        $mpdf->SetSubject('Formato CTA-FMT-001 - Creación o Actualización de Cliente');
+        $mpdf->SetKeywords('CTA-FMT-001, cliente, creación, actualización, ' . $cliente->numero_documento);
+
+        $mpdf->SetProtection(['print', 'print-highres'], '', null, 128);
+
+        $mpdf->WriteHTML($html);
+
+        return $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
     }
 
     public function generarYSubir(Cliente $cliente): string

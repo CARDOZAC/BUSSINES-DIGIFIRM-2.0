@@ -15,11 +15,16 @@ class User extends Authenticatable
 
     protected $fillable = [
         'empresa_id',
+        'codigo_vendedor',
         'name',
         'email',
         'celular',
+        'zona',
         'password',
         'active',
+        'ultimo_login',
+        'ip_ultimo_login',
+        'ubicacion_ultimo_login',
     ];
 
     protected $hidden = [
@@ -33,6 +38,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'active' => 'boolean',
+            'ultimo_login' => 'datetime',
         ];
     }
 

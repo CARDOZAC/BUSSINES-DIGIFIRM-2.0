@@ -50,6 +50,16 @@ class EmpresaSeeder extends Seeder
                 'color_hex' => '#7c3aed',
                 'activa' => true,
             ],
+            [
+                'nombre' => 'RINVALSUPERRICAS',
+                'razon_social' => 'RINVAL SUPER RICAS SAS',
+                'nit' => '901234567-5',
+                'direccion' => null,
+                'correo' => null,
+                'celular' => null,
+                'color_hex' => '#0d9488',
+                'activa' => true,
+            ],
         ];
 
         foreach ($empresas as $empresa) {
