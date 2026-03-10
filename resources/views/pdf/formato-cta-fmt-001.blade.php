@@ -42,7 +42,7 @@
             vertical-align: middle;
             margin-right: 2px;
         }
-        .checkbox.checked { background-color: #1e3a5f; color: #fff; font-weight: bold; }
+        .checkbox-checked { background-color: #1e3a5f; color: #fff; font-weight: bold; }
 
         .underline-field {
             border-bottom: 1px solid #000;
@@ -78,15 +78,15 @@
 <body>
 
 @php
-    $logoAjar = str_replace('\\', '/', base_path('index/AJAR_DISTRIBUCIONES-removebg-preview.png'));
-    $logoRinval = str_replace('\\', '/', base_path('index/RINVAL_SAS-removebg-preview.png'));
-    $logoDistmasivos = str_replace('\\', '/', base_path('index/LOGODISTMASIVOS.-removebg-preview.png'));
+    $logoAjar = str_replace('\\', '/', base_path('imagen/ajar.png.png'));
+    $logoRinval = str_replace('\\', '/', base_path('imagen/rinval.png.jfif'));
+    $logoDistmasivos = str_replace('\\', '/', base_path('imagen/distmasivos.png.jfif'));
 @endphp
 
 {{-- ===================== PÁGINA 1 ===================== --}}
 <div class="page">
 <table class="main-table">
-    {{-- HEADER: Logos de empresas (margen izquierdo superior) --}}
+    {{-- HEADER: 3 logos grupo R&V (margen izquierdo superior) --}}
     <tr class="header-row">
         <td rowspan="4" style="width: 20%; text-align: center; vertical-align: top; border-right: 1.5px solid #000; padding: 6px 4px;">
             <table style="width: 100%; border: none; margin: 0 auto;" class="no-border">
@@ -149,13 +149,13 @@
     </tr>
     <tr>
         <td colspan="3" style="border-right: 1.5px solid #000;">
-            <span class="checkbox {{ $cliente->tipo_solicitud === 'creacion' ? 'checked' : '' }}">{{ $cliente->tipo_solicitud === 'creacion' ? '✓' : '' }}</span>
+            <span class="checkbox {{ $cliente->tipo_solicitud === 'creacion' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_solicitud === 'creacion' ? '✓' : '' }}</span>
             CREACION CLIENTE CONTADO
             &nbsp;&nbsp;&nbsp;
-            <span class="checkbox {{ $cliente->tipo_solicitud === 'actualizacion' ? 'checked' : '' }}">{{ $cliente->tipo_solicitud === 'actualizacion' ? '✓' : '' }}</span>
+            <span class="checkbox {{ $cliente->tipo_solicitud === 'actualizacion' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_solicitud === 'actualizacion' ? '✓' : '' }}</span>
             ACTUALIZACION DATOS
             &nbsp;&nbsp;&nbsp;
-            <span class="checkbox {{ $cliente->tipo_solicitud === 'reactivacion' ? 'checked' : '' }}">{{ $cliente->tipo_solicitud === 'reactivacion' ? '✓' : '' }}</span>
+            <span class="checkbox {{ $cliente->tipo_solicitud === 'reactivacion' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_solicitud === 'reactivacion' ? '✓' : '' }}</span>
             REACTIVACION CLIENTE CONTADO
         </td>
         <td>
@@ -179,11 +179,11 @@
     <tr>
         <td colspan="4">
             <span class="field-label">Tipo de documento:</span>
-            <span class="checkbox {{ $cliente->tipo_documento === 'CC' ? 'checked' : '' }}">{{ $cliente->tipo_documento === 'CC' ? '✓' : '' }}</span> CC
+            <span class="checkbox {{ $cliente->tipo_documento === 'CC' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_documento === 'CC' ? '✓' : '' }}</span> CC
             &nbsp;
-            <span class="checkbox {{ $cliente->tipo_documento === 'NIT' ? 'checked' : '' }}">{{ $cliente->tipo_documento === 'NIT' ? '✓' : '' }}</span> NIT
+            <span class="checkbox {{ $cliente->tipo_documento === 'NIT' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_documento === 'NIT' ? '✓' : '' }}</span> NIT
             &nbsp;
-            <span class="checkbox {{ $cliente->tipo_documento === 'CE' ? 'checked' : '' }}">{{ $cliente->tipo_documento === 'CE' ? '✓' : '' }}</span> C.E
+            <span class="checkbox {{ $cliente->tipo_documento === 'CE' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_documento === 'CE' ? '✓' : '' }}</span> C.E
             &nbsp;&nbsp;
             <span class="field-label">No.</span>
             <span class="underline-field" style="min-width: 200px;">{{ $cliente->numero_documento }}</span>
@@ -230,11 +230,11 @@
     <tr>
         <td colspan="4">
             <span class="field-label">Tipo de negocio:</span>
-            <span class="checkbox {{ $cliente->tipo_negocio === 'mayorista' ? 'checked' : '' }}">{{ $cliente->tipo_negocio === 'mayorista' ? '✓' : '' }}</span> Mayorista
+            <span class="checkbox {{ $cliente->tipo_negocio === 'mayorista' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_negocio === 'mayorista' ? '✓' : '' }}</span> Mayorista
             &nbsp;
-            <span class="checkbox {{ $cliente->tipo_negocio === 'supermercado' ? 'checked' : '' }}">{{ $cliente->tipo_negocio === 'supermercado' ? '✓' : '' }}</span> Supermercado
+            <span class="checkbox {{ $cliente->tipo_negocio === 'supermercado' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_negocio === 'supermercado' ? '✓' : '' }}</span> Supermercado
             &nbsp;
-            <span class="checkbox {{ $cliente->tipo_negocio === 'tienda' ? 'checked' : '' }}">{{ $cliente->tipo_negocio === 'tienda' ? '✓' : '' }}</span> Tienda
+            <span class="checkbox {{ $cliente->tipo_negocio === 'tienda' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_negocio === 'tienda' ? '✓' : '' }}</span> Tienda
             &nbsp;
             <span class="field-label">Otro:</span>
             <span class="underline-field">{{ $cliente->tipo_negocio === 'otro' ? ($cliente->tipo_negocio_otro ?? '') : '' }}</span>
@@ -254,11 +254,11 @@
     <tr>
         <td colspan="4">
             <span class="field-label">Tipo de documento:</span>
-            <span class="checkbox {{ ($cliente->representante_legal_tipo_documento ?? '') === 'CC' ? 'checked' : '' }}">{{ ($cliente->representante_legal_tipo_documento ?? '') === 'CC' ? '✓' : '' }}</span> C.C
+            <span class="checkbox {{ ($cliente->representante_legal_tipo_documento ?? '') === 'CC' ? 'checkbox-checked' : '' }}">{{ ($cliente->representante_legal_tipo_documento ?? '') === 'CC' ? '✓' : '' }}</span> C.C
             &nbsp;
-            <span class="checkbox {{ ($cliente->representante_legal_tipo_documento ?? '') === 'NIT' ? 'checked' : '' }}">{{ ($cliente->representante_legal_tipo_documento ?? '') === 'NIT' ? '✓' : '' }}</span> NIT
+            <span class="checkbox {{ ($cliente->representante_legal_tipo_documento ?? '') === 'NIT' ? 'checkbox-checked' : '' }}">{{ ($cliente->representante_legal_tipo_documento ?? '') === 'NIT' ? '✓' : '' }}</span> NIT
             &nbsp;
-            <span class="checkbox {{ ($cliente->representante_legal_tipo_documento ?? '') === 'CE' ? 'checked' : '' }}">{{ ($cliente->representante_legal_tipo_documento ?? '') === 'CE' ? '✓' : '' }}</span> CE
+            <span class="checkbox {{ ($cliente->representante_legal_tipo_documento ?? '') === 'CE' ? 'checkbox-checked' : '' }}">{{ ($cliente->representante_legal_tipo_documento ?? '') === 'CE' ? '✓' : '' }}</span> CE
             &nbsp;&nbsp;
             <span class="field-label">No.</span>
             <span class="underline-field" style="min-width: 200px;">{{ $cliente->representante_legal_numero_documento ?? '' }}</span>
@@ -282,31 +282,31 @@
         <td colspan="4">
             <span class="field-label">Agente retención en la fuente</span>
             &nbsp;
-            <span class="checkbox {{ $cliente->agente_retencion_fuente ? 'checked' : '' }}">{{ $cliente->agente_retencion_fuente ? '✓' : '' }}</span> SI
+            <span class="checkbox {{ $cliente->agente_retencion_fuente === true ? 'checkbox-checked' : '' }}">{{ $cliente->agente_retencion_fuente === true ? '✓' : '' }}</span> SI
             &nbsp;
-            <span class="checkbox {{ !$cliente->agente_retencion_fuente ? 'checked' : '' }}">{{ !$cliente->agente_retencion_fuente ? '✓' : '' }}</span> NO
+            <span class="checkbox {{ $cliente->agente_retencion_fuente === false ? 'checkbox-checked' : '' }}">{{ $cliente->agente_retencion_fuente === false ? '✓' : '' }}</span> NO
             &nbsp;&nbsp;&nbsp;&nbsp;
-            <span class="checkbox {{ $cliente->responsable_iva === 'no_responsable' ? 'checked' : '' }}">{{ $cliente->responsable_iva === 'no_responsable' ? '✓' : '' }}</span> No responsable de IVA
+            <span class="checkbox {{ $cliente->responsable_iva === 'no_responsable' ? 'checkbox-checked' : '' }}">{{ $cliente->responsable_iva === 'no_responsable' ? '✓' : '' }}</span> No responsable de IVA
             &nbsp;
-            <span class="checkbox {{ $cliente->responsable_iva === 'responsable' ? 'checked' : '' }}">{{ $cliente->responsable_iva === 'responsable' ? '✓' : '' }}</span> Responsable IVA
+            <span class="checkbox {{ $cliente->responsable_iva === 'responsable' ? 'checkbox-checked' : '' }}">{{ $cliente->responsable_iva === 'responsable' ? '✓' : '' }}</span> Responsable IVA
         </td>
     </tr>
     <tr>
         <td colspan="4">
             <span class="field-label">Tipo de régimen</span>
             &nbsp;
-            <span class="checkbox {{ $cliente->tipo_regimen === 'gran_contribuyente' ? 'checked' : '' }}">{{ $cliente->tipo_regimen === 'gran_contribuyente' ? '✓' : '' }}</span> Gran Contribuyente
+            <span class="checkbox {{ $cliente->tipo_regimen === 'gran_contribuyente' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_regimen === 'gran_contribuyente' ? '✓' : '' }}</span> Gran Contribuyente
             &nbsp;&nbsp;
-            <span class="checkbox {{ $cliente->tipo_regimen === 'autorretenedor' ? 'checked' : '' }}">{{ $cliente->tipo_regimen === 'autorretenedor' ? '✓' : '' }}</span> Autorretenedor
+            <span class="checkbox {{ $cliente->tipo_regimen === 'autorretenedor' ? 'checkbox-checked' : '' }}">{{ $cliente->tipo_regimen === 'autorretenedor' ? '✓' : '' }}</span> Autorretenedor
         </td>
     </tr>
     <tr>
         <td colspan="4">
             <span class="field-label">Agente retención ICO</span>
             &nbsp;
-            <span class="checkbox {{ $cliente->agente_retencion_ico ? 'checked' : '' }}">{{ $cliente->agente_retencion_ico ? '✓' : '' }}</span> SI
+            <span class="checkbox {{ $cliente->agente_retencion_ico === true ? 'checkbox-checked' : '' }}">{{ $cliente->agente_retencion_ico === true ? '✓' : '' }}</span> SI
             &nbsp;
-            <span class="checkbox {{ !$cliente->agente_retencion_ico ? 'checked' : '' }}">{{ !$cliente->agente_retencion_ico ? '✓' : '' }}</span> NO
+            <span class="checkbox {{ $cliente->agente_retencion_ico === false ? 'checkbox-checked' : '' }}">{{ $cliente->agente_retencion_ico === false ? '✓' : '' }}</span> NO
         </td>
     </tr>
 
@@ -478,24 +478,24 @@
         <td colspan="4" style="padding: 5px 8px;">
             <strong>Clientes de contado:</strong>
             &nbsp;
-            <span class="checkbox {{ $cliente->cliente_contado ? 'checked' : '' }}">{{ $cliente->cliente_contado ? '✓' : '' }}</span> Si
+            <span class="checkbox {{ $cliente->cliente_contado === true ? 'checkbox-checked' : '' }}">{{ $cliente->cliente_contado === true ? '✓' : '' }}</span> Si
             &nbsp;
-            <span class="checkbox {{ !$cliente->cliente_contado ? 'checked' : '' }}">{{ !$cliente->cliente_contado ? '✓' : '' }}</span> No
+            <span class="checkbox {{ $cliente->cliente_contado === false ? 'checkbox-checked' : '' }}">{{ $cliente->cliente_contado === false ? '✓' : '' }}</span> No
         </td>
     </tr>
     <tr>
         <td colspan="4" style="padding: 5px 8px;">
             1. Formato diligenciado (CTA-FMT-001).
             &nbsp;
-            <span class="checkbox checked">✓</span>
+            <span class="checkbox checkbox-checked">✓</span>
             <br>
-            2. Documento de identidad (cédula) al 150% (requisito para creación).
+            2. Documento de identidad al 150% (requisito para creación).
             &nbsp;
-            <span class="checkbox {{ ($cliente->checklist_documento_identidad ?? false) ? 'checked' : '' }}">{{ ($cliente->checklist_documento_identidad ?? false) ? '✓' : '' }}</span>
+            <span class="checkbox {{ ($cliente->checklist_documento_identidad ?? false) === true ? 'checkbox-checked' : '' }}">{{ ($cliente->checklist_documento_identidad ?? false) === true ? '✓' : '' }}</span>
             <br>
-            3. Copia RUT{{ ($cliente->persona_natural_no_responsable_iva ?? false) ? ' (N/A persona natural sin RUT)' : '' }}.
+            3. Copia RUT.
             &nbsp;
-            <span class="checkbox {{ ($cliente->checklist_rut ?? false) || ($cliente->persona_natural_no_responsable_iva ?? false) ? 'checked' : '' }}">{{ ($cliente->checklist_rut ?? false) || ($cliente->persona_natural_no_responsable_iva ?? false) ? '✓' : '' }}</span>
+            <span class="checkbox {{ ($cliente->checklist_rut ?? false) === true ? 'checkbox-checked' : '' }}">{{ ($cliente->checklist_rut ?? false) === true ? '✓' : '' }}</span>
         </td>
     </tr>
     <tr>
