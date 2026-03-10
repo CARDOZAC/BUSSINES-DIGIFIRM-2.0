@@ -1,23 +1,25 @@
 <div>
     {{-- ========== HEADER ========== --}}
-    <div class="bg-primary text-primary-content shadow-lg">
+    <div class="bg-white border-b border-gray-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight">Clientes Registrados</h1>
-                    <p class="text-sm opacity-80 mt-0.5">
+                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Clientes Registrados</h1>
+                    <p class="text-sm text-gray-600 mt-0.5">
                         <span class="font-semibold">{{ $totalClientes }}</span> clientes encontrados
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('clientes.crear') }}" class="btn btn-sm bg-white/10 border-white/20 text-white hover:bg-white/20 gap-1">
+                    <a href="{{ route('clientes.crear') }}" class="btn btn-sm btn-neutral gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Nuevo
                     </a>
-                    <button wire:click="exportarCsv" class="btn btn-sm bg-green-600 border-green-700 text-white hover:bg-green-700 gap-1">
+                    @can('export', App\Models\Cliente::class)
+                    <button wire:click="exportarCsv" class="btn btn-sm btn-success gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                         Exportar CSV
                     </button>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -169,26 +171,24 @@
                             </td>
                             <td>
                                 <div class="flex items-center justify-center gap-1">
-                                    {{-- Ver detalle --}}
+                                    {{-- Ver detalle (ojito) --}}
                                     <div class="tooltip" data-tip="Ver detalle">
                                         <button onclick="document.getElementById('modal-{{ $cliente->id }}').showModal()" class="btn btn-ghost btn-xs btn-square">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                         </button>
                                     </div>
 
-                                    {{-- Ver PDF --}}
-                                    @if($cliente->pdf_url)
-                                    <div class="tooltip" data-tip="Ver PDF">
+                                    {{-- PDF: Ver / Descargar (formato CTA-FMT-001 con metadatos) --}}
+                                    <div class="tooltip" data-tip="Ver PDF (CTA-FMT-001)">
                                         <a href="{{ route('clientes.pdf.ver', $cliente->id) }}" target="_blank" class="btn btn-ghost btn-xs btn-square">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                                         </a>
                                     </div>
-                                    <div class="tooltip" data-tip="Descargar PDF">
+                                    <div class="tooltip" data-tip="Descargar PDF (CTA-FMT-001)">
                                         <a href="{{ route('clientes.pdf.descargar', $cliente->id) }}" class="btn btn-ghost btn-xs btn-square" download>
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                         </a>
                                     </div>
-                                    @endif
 
                                     {{-- Archivar (solo admin) --}}
                                     @if($esAdmin)
@@ -226,6 +226,23 @@
                                     <div><span class="font-semibold text-xs text-base-content/60">Contado:</span><br>{{ $cliente->cliente_contado ? 'Sí' : 'No' }}</div>
                                 </div>
 
+                                @if($cliente->cedula_pdf_url || $cliente->rut_pdf_url)
+                                <div class="mt-4 space-y-1">
+                                    <span class="font-semibold text-xs text-base-content/60">Documentos:</span>
+                                    <div class="flex flex-wrap gap-2">
+                                        @if($cliente->cedula_pdf_url)
+                                            <a href="{{ route('clientes.documento.descargar', ['id' => $cliente->id, 'tipo' => 'cedula']) }}" target="_blank" class="btn btn-xs btn-outline btn-primary">
+                                                Cédula PDF
+                                            </a>
+                                        @endif
+                                        @if($cliente->rut_pdf_url)
+                                            <a href="{{ route('clientes.documento.descargar', ['id' => $cliente->id, 'tipo' => 'rut']) }}" target="_blank" class="btn btn-xs btn-outline btn-primary">
+                                                RUT PDF
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endif
                                 @if($cliente->foto_url)
                                 <div class="mt-4">
                                     <span class="font-semibold text-xs text-base-content/60">Foto del cliente:</span>

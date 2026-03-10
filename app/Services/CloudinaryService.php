@@ -38,6 +38,19 @@ class CloudinaryService
         ];
     }
 
+    public function subirPdfArchivo(UploadedFile $archivo, string $carpeta = 'clientes/documentos'): array
+    {
+        $resultado = Cloudinary::upload($archivo->getRealPath(), [
+            'folder' => $carpeta,
+            'resource_type' => 'raw',
+        ]);
+
+        return [
+            'url' => $resultado->getSecurePath(),
+            'public_id' => $resultado->getPublicId(),
+        ];
+    }
+
     public function eliminar(string $publicId, string $resourceType = 'image'): void
     {
         Cloudinary::destroy($publicId, ['resource_type' => $resourceType]);

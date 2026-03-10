@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\EmpresaScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -44,6 +45,9 @@ class Cliente extends Model
         'fuente_recursos',
         'firma_base64',
         'foto_url',
+        'cedula_pdf_url',
+        'rut_pdf_url',
+        'persona_natural_no_responsable_iva',
         'cliente_contado',
         'checklist_formato',
         'checklist_documento_identidad',
@@ -64,6 +68,7 @@ class Cliente extends Model
             'agente_retencion_fuente' => 'boolean',
             'agente_retencion_ico' => 'boolean',
             'cliente_contado' => 'boolean',
+            'persona_natural_no_responsable_iva' => 'boolean',
             'checklist_formato' => 'boolean',
             'checklist_documento_identidad' => 'boolean',
             'checklist_rut' => 'boolean',
@@ -74,6 +79,7 @@ class Cliente extends Model
 
     protected static function booted(): void
     {
+        static::addGlobalScope(new EmpresaScope());
         static::creating(function (Cliente $cliente): void {
             if (empty($cliente->codigo_verificacion_qr)) {
                 $cliente->codigo_verificacion_qr = Str::uuid()->toString();

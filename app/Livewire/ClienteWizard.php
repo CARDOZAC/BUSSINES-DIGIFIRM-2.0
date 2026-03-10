@@ -42,6 +42,7 @@ class ClienteWizard extends Component
     public string $representante_legal_numero_documento = '';
 
     // --- Paso 3: Información Tributaria ---
+    public bool $persona_natural_no_responsable_iva = false;
     public string $codigo_ciiu = '';
     public string $actividad_economica = '';
     public bool $agente_retencion_fuente = false;
@@ -51,10 +52,10 @@ class ClienteWizard extends Component
     public string $correo_factura_electronica = '';
     public string $fuente_recursos = '';
 
-    // --- Paso 4: Firma, Foto y Confirmación ---
+    // --- Paso 4: Firma, Documentos y Confirmación ---
     public string $firma_base64 = '';
-    public $foto_cliente = null; // TemporaryUploadedFile
-    public ?string $foto_preview_url = null;
+    public $documento_cedula_pdf = null;
+    public $documento_rut_pdf = null;
     public bool $cliente_contado = true;
     public string $observaciones = '';
     public bool $confirmacion_datos = false;
@@ -81,18 +82,38 @@ class ClienteWizard extends Component
         $this->empresaSeleccionada = $valor ? Empresa::find($valor) : null;
     }
 
-    public function updatedFotoCliente(): void
+    public function updatedDocumentoCedulaPdf(): void
     {
         $this->validate([
-            'foto_cliente' => 'image|max:5120',
+            'documento_cedula_pdf' => 'nullable|file|mimes:pdf|max:10240',
         ], [
-            'foto_cliente.image' => 'El archivo debe ser una imagen.',
-            'foto_cliente.max' => 'La foto no debe superar 5MB.',
+            'documento_cedula_pdf.mimes' => 'El documento de cédula debe ser un archivo PDF.',
+            'documento_cedula_pdf.max' => 'El PDF no debe superar 10MB.',
         ]);
+    }
 
-        if ($this->foto_cliente) {
-            $this->foto_preview_url = $this->foto_cliente->temporaryUrl();
-        }
+    public function updatedDocumentoRutPdf(): void
+    {
+        $this->validate([
+            'documento_rut_pdf' => 'nullable|file|mimes:pdf|max:10240',
+        ], [
+            'documento_rut_pdf.mimes' => 'El documento RUT debe ser un archivo PDF.',
+            'documento_rut_pdf.max' => 'El PDF no debe superar 10MB.',
+        ]);
+    }
+
+    public function precargarDatosPersonaNaturalSinRut(): void
+    {
+        $this->persona_natural_no_responsable_iva = true;
+        $this->responsable_iva = 'no_responsable';
+        $this->tipo_regimen = null;
+        $this->agente_retencion_fuente = false;
+        $this->agente_retencion_ico = false;
+        $this->codigo_ciiu = '';
+        $this->actividad_economica = 'Persona natural - No responsable de IVA';
+        $this->correo_factura_electronica = $this->correo_electronico ?: '';
+        $this->fuente_recursos = 'Actividad económica personal - Ingresos propios';
+        session()->flash('chiluto_ok', 'Datos precargados para persona natural sin RUT.');
     }
 
     public function getProgresoPorcentajeProperty(): int
@@ -126,21 +147,51 @@ class ClienteWizard extends Component
 
     public function guardarCliente(): void
     {
-        $this->validate($this->reglasDelPaso(4), $this->mensajesValidacion());
+        $this->authorize('create', Cliente::class);
+
+        $this->validate(array_merge(
+            $this->reglasDelPaso(4),
+            ['empresa_id' => 'required|exists:empresas,id']
+        ), $this->mensajesValidacion());
 
         if (!$this->confirmacion_datos) {
             $this->addError('confirmacion_datos', 'Debe confirmar que los datos son verídicos.');
             return;
         }
 
+        $usuario = Auth::user();
+        if ($usuario->esVendedor() && !$usuario->esAdminCartera()) {
+            $this->empresa_id = $usuario->empresa_id;
+            $this->empresaSeleccionada = Empresa::find($usuario->empresa_id);
+        } elseif (($usuario->hasAnyRole(['super_admin', 'admin-cartera']) && $this->empresa_id === null) && $usuario->empresa_id) {
+            // Fallback: super_admin/admin-cartera con empresa asignada pero sin selección en paso 1
+            $this->empresa_id = $usuario->empresa_id;
+            $this->empresaSeleccionada = Empresa::find($usuario->empresa_id);
+        }
+
         $this->guardando = true;
 
         try {
-            $fotoUrl = null;
-            if ($this->foto_cliente) {
-                $cloudinary = app(CloudinaryService::class);
-                $resultado = $cloudinary->subirFotoCliente($this->foto_cliente);
-                $fotoUrl = $resultado['url'];
+            $cloudinary = app(CloudinaryService::class);
+            $cedulaPdfUrl = null;
+            $rutPdfUrl = null;
+
+            if ($this->documento_cedula_pdf) {
+                try {
+                    $resultado = $cloudinary->subirPdfArchivo($this->documento_cedula_pdf, 'clientes/cedulas');
+                    $cedulaPdfUrl = $resultado['url'];
+                } catch (\Throwable $e) {
+                    logger()->warning("Cloudinary no disponible para cédula PDF: " . $e->getMessage());
+                }
+            }
+
+            if ($this->documento_rut_pdf) {
+                try {
+                    $resultado = $cloudinary->subirPdfArchivo($this->documento_rut_pdf, 'clientes/ruts');
+                    $rutPdfUrl = $resultado['url'];
+                } catch (\Throwable $e) {
+                    logger()->warning("Cloudinary no disponible para RUT PDF: " . $e->getMessage());
+                }
             }
 
             $cliente = Cliente::create([
@@ -172,7 +223,11 @@ class ClienteWizard extends Component
                 'correo_factura_electronica' => $this->correo_factura_electronica ?: null,
                 'fuente_recursos' => $this->fuente_recursos ?: null,
                 'firma_base64' => $this->firma_base64,
-                'foto_url' => $fotoUrl,
+                'cedula_pdf_url' => $cedulaPdfUrl,
+                'rut_pdf_url' => $rutPdfUrl,
+                'checklist_documento_identidad' => !empty($cedulaPdfUrl),
+                'checklist_rut' => !empty($rutPdfUrl),
+                'persona_natural_no_responsable_iva' => $this->persona_natural_no_responsable_iva,
                 'cliente_contado' => $this->cliente_contado,
                 'ip_dispositivo' => request()->ip(),
                 'user_agent_dispositivo' => request()->userAgent(),
@@ -245,7 +300,8 @@ class ClienteWizard extends Component
             ],
             4 => [
                 'firma_base64' => 'required|string|min:50',
-                'foto_cliente' => 'nullable|image|max:5120',
+                'documento_cedula_pdf' => 'nullable|file|mimes:pdf|max:10240',
+                'documento_rut_pdf' => 'nullable|file|mimes:pdf|max:10240',
                 'cliente_contado' => 'boolean',
                 'confirmacion_datos' => 'accepted',
             ],
@@ -279,8 +335,10 @@ class ClienteWizard extends Component
             'correo_factura_electronica.email' => 'Ingrese un correo válido para factura electrónica.',
             'firma_base64.required' => 'La firma del cliente es obligatoria.',
             'firma_base64.min' => 'La firma capturada no es válida. Firme nuevamente.',
-            'foto_cliente.image' => 'El archivo debe ser una imagen.',
-            'foto_cliente.max' => 'La foto no debe superar 5MB.',
+            'documento_cedula_pdf.mimes' => 'El documento de cédula debe ser un archivo PDF.',
+            'documento_cedula_pdf.max' => 'El PDF de cédula no debe superar 10MB.',
+            'documento_rut_pdf.mimes' => 'El documento RUT debe ser un archivo PDF.',
+            'documento_rut_pdf.max' => 'El PDF de RUT no debe superar 10MB.',
             'confirmacion_datos.accepted' => 'Debe confirmar que los datos son verídicos y la firma es del cliente.',
         ];
     }

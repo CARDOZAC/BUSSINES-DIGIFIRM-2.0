@@ -31,6 +31,9 @@ class RolesPermisosSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permiso]);
         }
 
+        $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
+        $superAdmin->syncPermissions($permisos);
+
         $adminCartera = Role::firstOrCreate(['name' => 'admin-cartera']);
         $adminCartera->syncPermissions($permisos);
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
+use App\Services\ActivityLogService;
+use App\Services\PdfClienteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -14,11 +16,13 @@ class ClientePdfController extends Controller
 
         $this->authorize('view', $cliente);
 
-        if (!$cliente->pdf_url) {
-            abort(404, 'No hay PDF disponible para este cliente.');
+        app(ActivityLogService::class)->registrarAccion('ver_pdf', 'clientes', $cliente->id, "Visualización PDF cliente #{$cliente->id}");
+
+        if ($cliente->pdf_url) {
+            return redirect($cliente->pdf_url);
         }
 
-        return redirect($cliente->pdf_url);
+        return $this->responderPdfLocal($cliente, 'inline');
     }
 
     public function descargar(Request $request, int $id)
@@ -27,22 +31,38 @@ class ClientePdfController extends Controller
 
         $this->authorize('view', $cliente);
 
-        if (!$cliente->pdf_url) {
-            abort(404, 'No hay PDF disponible para este cliente.');
+        app(ActivityLogService::class)->registrarAccion('descargar_pdf', 'clientes', $cliente->id, "Descarga PDF cliente #{$cliente->id}");
+
+        if ($cliente->pdf_url) {
+            $response = Http::timeout(30)->get($cliente->pdf_url);
+            if ($response->successful()) {
+                $nombre = "CTA-FMT-001_{$cliente->numero_documento}_{$cliente->id}.pdf";
+                return response($response->body(), 200, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $nombre . '"',
+                    'Content-Length' => strlen($response->body()),
+                ]);
+            }
         }
 
-        $response = Http::timeout(30)->get($cliente->pdf_url);
+        return $this->responderPdfLocal($cliente, 'attachment');
+    }
 
-        if (!$response->successful()) {
-            abort(502, 'No se pudo obtener el PDF.');
+    private function responderPdfLocal(Cliente $cliente, string $disposition): \Illuminate\Http\Response
+    {
+        try {
+            $pdfService = app(PdfClienteService::class);
+            $contenido = $pdfService->generarPdfComoString($cliente);
+            $nombre = "CTA-FMT-001_{$cliente->numero_documento}_{$cliente->id}.pdf";
+
+            return response($contenido, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => $disposition . '; filename="' . $nombre . '"',
+                'Content-Length' => strlen($contenido),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+            abort(500, 'No se pudo generar el PDF. Revise storage/logs/laravel.log para más detalles.');
         }
-
-        $nombre = "CTA-FMT-001_{$cliente->numero_documento}_{$cliente->id}.pdf";
-
-        return response($response->body(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $nombre . '"',
-            'Content-Length' => strlen($response->body()),
-        ]);
     }
 }

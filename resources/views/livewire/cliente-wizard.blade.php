@@ -1,29 +1,29 @@
 <div>
     {{-- ========== HEADER FIJO ========== --}}
-    <div class="bg-primary text-primary-content shadow-lg sticky top-0 z-40">
+    <div class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 @if($empresaSeleccionada && $empresaSeleccionada->logo_path)
                     <img src="{{ asset($empresaSeleccionada->logo_path) }}"
                          alt="{{ $empresaSeleccionada->nombre }}"
-                         class="h-10 w-10 rounded-full bg-white p-0.5 object-contain">
+                         class="h-10 w-10 rounded-full bg-gray-100 p-0.5 object-contain border border-gray-200">
                 @else
-                    <div class="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+                    <div class="h-10 w-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
                 @endif
                 <div>
-                    <h1 class="text-lg font-bold leading-tight">
-                        {{ $empresaSeleccionada ? $empresaSeleccionada->nombre : 'Digital Clientes R&V' }}
+                    <h1 class="text-lg font-bold leading-tight text-gray-900">
+                        {{ $empresaSeleccionada ? $empresaSeleccionada->nombre : 'Sistema de Creación de Clientes' }}
                     </h1>
-                    <p class="text-xs opacity-80">Registro de Clientes</p>
+                    <p class="text-xs text-gray-600">Registro de Clientes</p>
                 </div>
             </div>
             <div class="text-right">
-                <p class="text-sm font-semibold">{{ Auth::user()->name }}</p>
-                <p class="text-xs opacity-80">Vendedor</p>
+                <p class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</p>
+                <p class="text-xs text-gray-600">Vendedor</p>
             </div>
         </div>
     </div>
@@ -300,8 +300,33 @@
                 </h2>
                 <p class="text-sm text-base-content/60 mb-4">Datos tributarios y fiscales del cliente.</p>
 
+                {{-- Chiluto: Precargar datos persona natural sin RUT --}}
+                <div class="divider text-xs font-semibold text-primary/70 uppercase">Persona Natural sin RUT</div>
+                <div class="p-4 bg-info/10 border border-info/30 rounded-lg">
+                    <p class="text-sm text-base-content/70 mb-3">
+                        Si el cliente es <strong>persona natural</strong> que <strong>no tiene RUT</strong> ni registros tributarios en la DIAN,
+                        puede precargar los datos generales con un solo clic.
+                    </p>
+                    <button type="button"
+                            wire:click="precargarDatosPersonaNaturalSinRut"
+                            class="btn btn-sm btn-outline btn-info gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Precargar datos (Persona natural sin RUT)
+                    </button>
+                    @if($persona_natural_no_responsable_iva)
+                        <span class="badge badge-success badge-sm ml-2 mt-2">Datos precargados</span>
+                    @endif
+                    @if(session('chiluto_ok'))
+                        <div class="alert alert-success alert-sm mt-3">
+                            <span>{{ session('chiluto_ok') }}</span>
+                        </div>
+                    @endif
+                </div>
+
                 {{-- CIIU y Actividad --}}
-                <div class="divider text-xs font-semibold text-primary/70 uppercase">Actividad Económica</div>
+                <div class="divider text-xs font-semibold text-primary/70 uppercase mt-6">Actividad Económica</div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Código CIIU</label>
@@ -403,15 +428,25 @@
                         ctx: null,
 
                         init() {
-                            this.$nextTick(() => {
-                                this.canvas = this.$refs.firmaCanvas;
-                                if (!this.canvas) return;
+                            this.$nextTick(() => this.resizeCanvas());
+                            window.addEventListener('resize', () => this.resizeCanvas());
+                        },
+
+                        resizeCanvas() {
+                            this.canvas = this.$refs.firmaCanvas;
+                            const container = this.$refs.canvasContainer;
+                            if (!this.canvas || !container) return;
+                            const w = container.offsetWidth;
+                            const h = 200;
+                            if (this.canvas.width !== w || this.canvas.height !== h) {
+                                this.canvas.width = w;
+                                this.canvas.height = h;
                                 this.ctx = this.canvas.getContext('2d');
                                 this.ctx.strokeStyle = '#1e3a5f';
                                 this.ctx.lineWidth = 2.5;
                                 this.ctx.lineCap = 'round';
                                 this.ctx.lineJoin = 'round';
-                            });
+                            }
                         },
 
                         getPos(e) {
@@ -426,7 +461,8 @@
                         },
 
                         startDraw(e) {
-                            e.preventDefault();
+                            if (e.cancelable) e.preventDefault();
+                            if (!this.ctx) return;
                             this.drawing = true;
                             const pos = this.getPos(e);
                             this.ctx.beginPath();
@@ -434,8 +470,8 @@
                         },
 
                         draw(e) {
-                            if (!this.drawing) return;
-                            e.preventDefault();
+                            if (!this.drawing || !this.ctx) return;
+                            if (e.cancelable) e.preventDefault();
                             const pos = this.getPos(e);
                             this.ctx.lineTo(pos.x, pos.y);
                             this.ctx.stroke();
@@ -451,30 +487,30 @@
                         },
 
                         clear() {
+                            if (!this.ctx) return;
                             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                             this.hasFirma = false;
                             $wire.set('firma_base64', '');
                         }
                      }"
                      class="space-y-2">
-                    <div class="relative">
+                    <div x-ref="canvasContainer" class="relative w-full">
                         <canvas x-ref="firmaCanvas"
-                                width="500"
-                                height="200"
                                 x-on:mousedown="startDraw($event)"
                                 x-on:mousemove="draw($event)"
                                 x-on:mouseup="endDraw()"
                                 x-on:mouseleave="endDraw()"
                                 x-on:touchstart="startDraw($event)"
-                                x-on:touchmove="draw($event)"
+                                x-on:touchmove.prevent="draw($event)"
                                 x-on:touchend="endDraw()"
-                                class="border-2 border-dashed rounded-lg cursor-crosshair bg-white w-full max-w-lg"
-                                x-bind:class="hasFirma ? 'border-success' : 'border-base-300'"
-                                style="touch-action: none; max-height: 200px;">
+                                x-on:touchcancel="endDraw()"
+                                class="border-2 border-dashed rounded-xl cursor-crosshair bg-white w-full block"
+                                style="touch-action: none; height: 200px;"
+                                x-bind:class="hasFirma ? 'border-success' : 'border-base-300'">
                         </canvas>
                         <div x-show="!hasFirma"
                              x-transition:leave.opacity
-                             class="absolute inset-0 flex items-center justify-center pointer-events-none max-w-lg">
+                             class="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <span class="text-gray-300 text-lg font-light select-none">Firme aquí</span>
                         </div>
                     </div>
@@ -495,33 +531,43 @@
                 </div>
                 @error('firma_base64') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
 
-                {{-- ===== FOTO DEL CLIENTE (solo para consulta en sistema, NO va en PDF) ===== --}}
-                <div class="divider text-xs font-semibold text-primary/70 uppercase mt-6">Foto del Cliente <span class="badge badge-xs badge-ghost">opcional</span></div>
-                <div class="space-y-3">
-                    <p class="text-xs text-base-content/50">La foto se almacena para consulta interna. No se incluye en el formato PDF.</p>
-                    <div class="flex flex-col sm:flex-row items-start gap-4">
-                        <div class="flex-1 w-full">
+                {{-- ===== DOCUMENTOS PDF (Cédula y RUT) - Opcionales ===== --}}
+                <div class="divider text-xs font-semibold text-primary/70 uppercase mt-6">Documentos PDF <span class="badge badge-xs badge-ghost">opcionales</span></div>
+                <div class="space-y-4">
+                    <p class="text-xs text-base-content/50">Suba los documentos en formato PDF. Se almacenan en la nube para consulta.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Cédula de Ciudadanía (PDF)</label>
                             <input type="file"
-                                   wire:model="foto_cliente"
-                                   accept="image/*"
-                                   capture="camera"
-                                   class="file-input w-full" />
-                            <div wire:loading wire:target="foto_cliente" class="flex items-center gap-2 mt-2 text-sm text-primary">
+                                   wire:model="documento_cedula_pdf"
+                                   accept="application/pdf"
+                                   class="file-input file-input-bordered w-full" />
+                            <div wire:loading wire:target="documento_cedula_pdf" class="flex items-center gap-2 mt-2 text-sm text-primary">
                                 <span class="loading loading-spinner loading-xs"></span>
-                                Cargando foto...
+                                Cargando...
                             </div>
+                            @if($documento_cedula_pdf)
+                                <p class="text-xs text-success mt-1">✓ Archivo cargado</p>
+                            @endif
+                            @error('documento_cedula_pdf') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
-
-                        @if($foto_preview_url)
-                        <div class="shrink-0">
-                            <p class="text-xs font-medium mb-1 text-base-content/60">Vista previa:</p>
-                            <img src="{{ $foto_preview_url }}"
-                                 alt="Preview foto cliente"
-                                 class="w-[120px] h-[120px] object-cover rounded-xl border-2 border-primary/30 shadow-md" />
+                        <div>
+                            <label class="block text-sm font-medium mb-1">RUT (PDF)</label>
+                            <input type="file"
+                                   wire:model="documento_rut_pdf"
+                                   accept="application/pdf"
+                                   class="file-input file-input-bordered w-full" />
+                            <div wire:loading wire:target="documento_rut_pdf" class="flex items-center gap-2 mt-2 text-sm text-primary">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                Cargando...
+                            </div>
+                            @if($documento_rut_pdf)
+                                <p class="text-xs text-success mt-1">✓ Archivo cargado</p>
+                            @endif
+                            <p class="text-xs text-base-content/50 mt-1">Para persona natural sin RUT, puede omitir.</p>
+                            @error('documento_rut_pdf') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
-                        @endif
                     </div>
-                    @error('foto_cliente') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- ===== DATOS ADICIONALES ===== --}}

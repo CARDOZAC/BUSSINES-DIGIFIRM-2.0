@@ -1,4 +1,4 @@
-# Digital Clientes R&V - Instrucciones de Inicio
+# DIGIFIRM 2.0 - Sistema de Creación de Clientes - Instrucciones de Inicio
 
 ## Requisitos previos
 
@@ -14,10 +14,18 @@
 
 ## 1. Instalación inicial (primera vez)
 
+**IMPORTANTE:** Este proyecto requiere **PHP 8.3**. Si Laragon usa PHP 8.2, cambie a PHP 8.3:
+- Laragon → Menu → PHP → Version → **php-8.3.30**
+
+O ejecute los comandos con la ruta completa:
+```bash
+C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.exe artisan migrate
+```
+
 ```bash
 cd c:\laragon\www\digital-clientes-rv
 
-# Instalar dependencias PHP
+# Instalar dependencias PHP (requiere PHP 8.3)
 composer install
 
 # Instalar dependencias Node.js
@@ -40,8 +48,12 @@ npm run build
 
 | Rol | Email | Contraseña |
 |---|---|---|
-| Admin Cartera | `admin@gruporv.com` | `Rv@2026!` |
-| Vendedor | `vendedor@gruporv.com` | `Rv@2026!` |
+| Super Admin | `super@todos.com` | `Rv@2026!` |
+| Admin Cartera | `admin@todos.com` | `Rv@2026!` |
+| Vendedor AJAR | `vendedor1@ajar.com` | `Rv@2026!` |
+| Vendedor RINVAL | `vendedor1@rinval.com` | `Rv@2026!` |
+| Vendedor DISTMASIVOS | `vendedor1@distmasivos.com` | `Rv@2026!` |
+| Vendedor RINVALSUPERRICAS | `vendedor1@rinvalsuperricas.com` | `Rv@2026!` |
 
 ---
 
@@ -100,8 +112,8 @@ C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.exe artisan serve --host=0.0.0.
 3. **Wizard de 4 pasos**:
    - **Paso 1**: Seleccionar empresa y tipo de solicitud
    - **Paso 2**: Información general del cliente (documento, nombre, dirección, etc.)
-   - **Paso 3**: Información tributaria (CIIU, IVA, retenciones)
-   - **Paso 4**: Firma digital en canvas + foto opcional + confirmación
+   - **Paso 3**: Información tributaria (CIIU, IVA, retenciones). Incluye opción "Precargar datos (Persona natural sin RUT)" para clientes que no tienen RUT.
+   - **Paso 4**: Firma digital en canvas + documentos PDF opcionales (cédula y RUT) + confirmación
 4. **Guardar**: Se genera automáticamente el PDF formato CTA-FMT-001 con firma, QR y hash
 
 ---
@@ -132,6 +144,10 @@ digital-clientes-rv/
 
 ## 6. Comandos útiles
 
+**Migraciones y seeders (si usa PHP 8.2 en la terminal):**
+- Doble clic en `migrate-seed.bat` para ejecutar migraciones y seeders con PHP 8.3
+- O use `run-artisan.bat migrate` y `run-artisan.bat db:seed`
+
 ```bash
 # Compilar assets en modo desarrollo (con hot reload)
 npm run dev
@@ -158,7 +174,7 @@ php artisan db:seed
 
 ---
 
-## 7. Configuración de Cloudinary (para PDFs y fotos)
+## 7. Configuración de Cloudinary (para PDFs y documentos)
 
 Las credenciales se configuran en `.env`:
 
@@ -167,7 +183,7 @@ CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
 CLOUDINARY_UPLOAD_PRESET=clientes_rv
 ```
 
-Si no se configura Cloudinary, los PDFs se generan localmente en `storage/app/private/pdfs/` pero no se suben a la nube. La foto del cliente es opcional.
+Si no se configura Cloudinary, los PDFs se generan localmente en `storage/app/private/pdfs/` pero no se suben a la nube. Los documentos PDF (cédula y RUT) son opcionales.
 
 ---
 

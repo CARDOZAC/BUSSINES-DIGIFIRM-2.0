@@ -17,11 +17,12 @@ class UsuarioAdminSeeder extends Seeder
             return;
         }
 
+        // Admin: puede ver todas las empresas (rol admin-cartera)
         $admin = User::updateOrCreate(
-            ['email' => 'admin@gruporv.com'],
+            ['email' => 'admin@todos.com'],
             [
                 'empresa_id' => $ajar->id,
-                'name' => 'Administrador R&V',
+                'name' => 'Administrador',
                 'password' => Hash::make('Rv@2026!'),
                 'active' => true,
             ]
@@ -29,16 +30,40 @@ class UsuarioAdminSeeder extends Seeder
 
         $admin->assignRole('admin-cartera');
 
-        $vendedor = User::updateOrCreate(
-            ['email' => 'vendedor@gruporv.com'],
+        // Super Admin: gestión de usuarios
+        $superAdmin = User::updateOrCreate(
+            ['email' => 'super@todos.com'],
             [
                 'empresa_id' => $ajar->id,
-                'name' => 'Vendedor Demo AJAR',
+                'name' => 'Super Administrador',
                 'password' => Hash::make('Rv@2026!'),
                 'active' => true,
             ]
         );
 
-        $vendedor->assignRole('vendedor');
+        $superAdmin->assignRole('super_admin');
+
+        // Vendedores: uno por empresa
+        $vendedores = [
+            ['email' => 'vendedor1@ajar.com', 'empresa' => 'AJAR', 'name' => 'Vendedor Demo AJAR'],
+            ['email' => 'vendedor1@rinval.com', 'empresa' => 'RINVAL', 'name' => 'Vendedor Demo RINVAL'],
+            ['email' => 'vendedor1@distmasivos.com', 'empresa' => 'DISTMASIVOS', 'name' => 'Vendedor Demo DISTMASIVOS'],
+            ['email' => 'vendedor1@rinvalsuperricas.com', 'empresa' => 'RINVALSUPERRICAS', 'name' => 'Vendedor Demo RINVALSUPERRICAS'],
+        ];
+
+        foreach ($vendedores as $v) {
+            $empresa = Empresa::where('nombre', $v['empresa'])->first();
+            if ($empresa) {
+                User::updateOrCreate(
+                    ['email' => $v['email']],
+                    [
+                        'empresa_id' => $empresa->id,
+                        'name' => $v['name'],
+                        'password' => Hash::make('Rv@2026!'),
+                        'active' => true,
+                    ]
+                )->assignRole('vendedor');
+            }
+        }
     }
 }

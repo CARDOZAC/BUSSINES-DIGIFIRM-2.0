@@ -78,15 +78,15 @@
 <body>
 
 @php
-    $logoAjar = str_replace('\\', '/', base_path('imagen/ajar.png.png'));
-    $logoRinval = str_replace('\\', '/', base_path('imagen/rinval.png.jfif'));
-    $logoDistmasivos = str_replace('\\', '/', base_path('imagen/distmasivos.png.jfif'));
+    $logoAjar = str_replace('\\', '/', base_path('index/AJAR_DISTRIBUCIONES-removebg-preview.png'));
+    $logoRinval = str_replace('\\', '/', base_path('index/RINVAL_SAS-removebg-preview.png'));
+    $logoDistmasivos = str_replace('\\', '/', base_path('index/LOGODISTMASIVOS.-removebg-preview.png'));
 @endphp
 
 {{-- ===================== PÁGINA 1 ===================== --}}
 <div class="page">
 <table class="main-table">
-    {{-- HEADER: 3 logos grupo R&V (margen izquierdo superior) --}}
+    {{-- HEADER: Logos de empresas (margen izquierdo superior) --}}
     <tr class="header-row">
         <td rowspan="4" style="width: 20%; text-align: center; vertical-align: top; border-right: 1.5px solid #000; padding: 6px 4px;">
             <table style="width: 100%; border: none; margin: 0 auto;" class="no-border">
@@ -489,13 +489,13 @@
             &nbsp;
             <span class="checkbox checked">✓</span>
             <br>
-            2. Documento de identidad al 150% (requisito para creación).
+            2. Documento de identidad (cédula) al 150% (requisito para creación).
             &nbsp;
             <span class="checkbox {{ ($cliente->checklist_documento_identidad ?? false) ? 'checked' : '' }}">{{ ($cliente->checklist_documento_identidad ?? false) ? '✓' : '' }}</span>
             <br>
-            3. Copia RUT.
+            3. Copia RUT{{ ($cliente->persona_natural_no_responsable_iva ?? false) ? ' (N/A persona natural sin RUT)' : '' }}.
             &nbsp;
-            <span class="checkbox {{ ($cliente->checklist_rut ?? false) ? 'checked' : '' }}">{{ ($cliente->checklist_rut ?? false) ? '✓' : '' }}</span>
+            <span class="checkbox {{ ($cliente->checklist_rut ?? false) || ($cliente->persona_natural_no_responsable_iva ?? false) ? 'checked' : '' }}">{{ ($cliente->checklist_rut ?? false) || ($cliente->persona_natural_no_responsable_iva ?? false) ? '✓' : '' }}</span>
         </td>
     </tr>
     <tr>
