@@ -178,6 +178,13 @@
                                         </button>
                                     </div>
 
+                                    {{-- Mapeo Proveedor (Tag) --}}
+                                    <div class="tooltip" data-tip="Asignar Código Proveedor">
+                                        <button wire:click="selectClienteParaMapeo({{ $cliente->id }})" class="btn btn-ghost btn-xs btn-square">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                                        </button>
+                                    </div>
+
                                     {{-- PDF: Ver / Descargar (formato CTA-FMT-001 con metadatos) --}}
                                     <div class="tooltip" data-tip="Ver PDF (CTA-FMT-001)">
                                         <a href="{{ route('clientes.pdf.ver', $cliente->id) }}" target="_blank" class="btn btn-ghost btn-xs btn-square">
@@ -287,4 +294,50 @@
             @endif
         </div>
     </div>
+
+    {{-- MODAL MAPEO PROVEEDOR --}}
+    <dialog id="modal-mapeo-proveedor" class="modal" wire:ignore.self>
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Asignar Código de Proveedor</h3>
+
+            <div class="space-y-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Proveedor</span></label>
+                    <select wire:model.live="selectedProviderId" class="select select-bordered w-full">
+                        <option value="">Seleccione un proveedor</option>
+                        @foreach($proveedores as $prov)
+                            <option value="{{ $prov->id }}">{{ $prov->nombre }}</option>
+                        @endforeach
+                    </select>
+                    @error('selectedProviderId') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Código Único</span></label>
+                    <input type="text" wire:model="providerCode" class="input input-bordered w-full" placeholder="Ingrese el código asignado">
+                    @error('providerCode') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="modal-action">
+                <button onclick="document.getElementById('modal-mapeo-proveedor').close()" class="btn btn-ghost">Cancelar</button>
+                <button wire:click="guardarMapeo" class="btn btn-primary">
+                    <span wire:loading wire:target="guardarMapeo" class="loading loading-spinner loading-xs"></span>
+                    Guardar
+                </button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('open-mapeo-modal', () => {
+                document.getElementById('modal-mapeo-proveedor').showModal();
+            });
+            Livewire.on('close-mapeo-modal', () => {
+                document.getElementById('modal-mapeo-proveedor').close();
+            });
+        });
+    </script>
 </div>

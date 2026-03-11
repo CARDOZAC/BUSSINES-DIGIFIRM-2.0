@@ -25,6 +25,11 @@ class TablaClientes extends Component
     public ?string $tipo_negocio = null;
     public int $perPage = 15;
 
+    // Mapping providers
+    public ?int $selectedClientId = null;
+    public ?int $selectedProviderId = null;
+    public string $providerCode = '';
+
     protected $queryString = [
         'busqueda' => ['except' => ''],
         'empresa_id' => ['except' => null],
@@ -62,6 +67,35 @@ class TablaClientes extends Component
     public function updatedTipoNegocio(): void
     {
         $this->resetPage();
+    }
+
+    public function selectClienteParaMapeo(int $clienteId): void
+    {
+        $this->selectedClientId = $clienteId;
+        $this->selectedProviderId = null;
+        $this->providerCode = '';
+        $this->dispatch('open-mapeo-modal');
+    }
+
+    public function guardarMapeo(): void
+    {
+        $this->validate([
+            'selectedClientId' => 'required|exists:clientes,id',
+            'selectedProviderId' => 'required|exists:proveedores,id',
+            'providerCode' => 'required|string|max:255',
+        ]);
+
+        $cliente = Cliente::findOrFail($this->selectedClientId);
+        $cliente->proveedoresMapeados()->syncWithoutDetaching([
+            $this->selectedProviderId => ['code' => $this->providerCode]
+        ]);
+
+        $this->selectedClientId = null;
+        $this->selectedProviderId = null;
+        $this->providerCode = '';
+
+        $this->dispatch('close-mapeo-modal');
+        session()->flash('message', 'Código de proveedor asignado correctamente.');
     }
 
     public function limpiarFiltros(): void
@@ -146,10 +180,15 @@ class TablaClientes extends Component
             ? User::activos()->orderBy('name')->get()
             : User::activos()->where('empresa_id', $usuario->empresa_id)->orderBy('name')->get();
 
+        $proveedores = $this->selectedClientId
+            ? \App\Models\Proveedor::where('empresa_id', Cliente::find($this->selectedClientId)?->empresa_id)->get()
+            : collect();
+
         return view('livewire.dashboard.tabla-clientes', [
             'clientes' => $query->paginate($this->perPage),
             'empresas' => $empresas,
             'vendedores' => $vendedores,
+            'proveedores' => $proveedores,
             'totalClientes' => $totalClientes,
             'esAdmin' => $usuario->esAdminCartera(),
         ])->layout('layouts.app');
