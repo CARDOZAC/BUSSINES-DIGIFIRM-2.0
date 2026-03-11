@@ -100,6 +100,13 @@ class Cliente extends Model
         return $this->belongsTo(Proveedor::class, 'proveedor_id');
     }
 
+    public function proveedoresMapeados()
+    {
+        return $this->belongsToMany(Proveedor::class, 'client_provider_codes', 'cliente_id', 'provider_id')
+            ->withPivot('code')
+            ->withTimestamps();
+    }
+
     public function vendedor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'vendedor_id');

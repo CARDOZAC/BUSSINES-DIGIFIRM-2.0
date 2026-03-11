@@ -24,12 +24,23 @@ class PdfClienteService
         $qrBase64 = $this->generarQrBase64($cliente);
         $hashVerificacion = $this->generarHash($cliente);
 
+        // Watermark selection logic
+        $empresaNombre = strtolower($cliente->empresa->nombre ?? '');
+        $watermarkPath = public_path('images/ajar.png'); // default
+
+        if (str_contains($empresaNombre, 'rinval')) {
+            $watermarkPath = public_path('images/rinval.png');
+        } elseif (str_contains($empresaNombre, 'distmasivos')) {
+            $watermarkPath = public_path('images/distmasivos.png');
+        }
+
         $html = View::make('pdf.formato-cta-fmt-001', [
             'cliente' => $cliente,
             'empresa' => $cliente->empresa,
             'vendedor' => $cliente->vendedor,
             'qrBase64' => $qrBase64,
             'hashVerificacion' => $hashVerificacion,
+            'watermark_path' => $watermarkPath,
         ])->render();
 
         $mpdf = new Mpdf([
@@ -75,12 +86,23 @@ class PdfClienteService
         $qrBase64 = $this->generarQrBase64($cliente);
         $hashVerificacion = $this->generarHash($cliente);
 
+        // Watermark selection logic
+        $empresaNombre = strtolower($cliente->empresa->nombre ?? '');
+        $watermarkPath = public_path('images/ajar.png'); // default
+
+        if (str_contains($empresaNombre, 'rinval')) {
+            $watermarkPath = public_path('images/rinval.png');
+        } elseif (str_contains($empresaNombre, 'distmasivos')) {
+            $watermarkPath = public_path('images/distmasivos.png');
+        }
+
         $html = View::make('pdf.formato-cta-fmt-001', [
             'cliente' => $cliente,
             'empresa' => $cliente->empresa,
             'vendedor' => $cliente->vendedor,
             'qrBase64' => $qrBase64,
             'hashVerificacion' => $hashVerificacion,
+            'watermark_path' => $watermarkPath,
         ])->render();
 
         $mpdf = new Mpdf([

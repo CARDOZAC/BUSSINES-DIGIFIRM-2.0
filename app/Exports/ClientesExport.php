@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Cliente;
+use App\Models\Proveedor;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -10,15 +11,17 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class ClientesExport implements FromQuery, WithHeadings, WithMapping
 {
     private array $filtros;
+    private $proveedores;
 
     public function __construct(array $filtros)
     {
         $this->filtros = $filtros;
+        $this->proveedores = Proveedor::orderBy('nombre')->get();
     }
 
     public function query()
     {
-        return Cliente::with(['empresa', 'vendedor'])
+        return Cliente::with(['empresa', 'vendedor', 'proveedoresMapeados'])
             ->completados()
             ->when($this->filtros['busqueda'] ?? null, function ($q, $busqueda) {
                 $term = '%' . $busqueda . '%';
@@ -38,7 +41,7 @@ class ClientesExport implements FromQuery, WithHeadings, WithMapping
 
     public function headings(): array
     {
-        return [
+        $headings = [
             'ID',
             'Empresa',
             'Nombre / Razón Social',
@@ -50,13 +53,20 @@ class ClientesExport implements FromQuery, WithHeadings, WithMapping
             'Tipo Negocio',
             'Vendedor',
             'Fecha Creación',
-            'URL PDF',
         ];
+
+        foreach ($this->proveedores as $proveedor) {
+            $headings[] = 'Código ' . $proveedor->nombre;
+        }
+
+        $headings[] = 'URL PDF';
+
+        return $headings;
     }
 
     public function map($cliente): array
     {
-        return [
+        $data = [
             $cliente->id,
             $cliente->empresa->nombre ?? 'N/A',
             $cliente->nombre_razon_social,
@@ -68,7 +78,16 @@ class ClientesExport implements FromQuery, WithHeadings, WithMapping
             $cliente->tipoNegocioTexto(),
             $cliente->vendedor->name ?? 'N/A',
             $cliente->created_at->format('d/m/Y H:i'),
-            $cliente->pdf_url ?? '',
         ];
+
+        $mapeos = $cliente->proveedoresMapeados->pluck('pivot.code', 'id');
+
+        foreach ($this->proveedores as $proveedor) {
+            $data[] = $mapeos[$proveedor->id] ?? '';
+        }
+
+        $data[] = $cliente->pdf_url ?? '';
+
+        return $data;
     }
 }

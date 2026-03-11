@@ -6,6 +6,17 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, Helvetica, sans-serif; font-size: 8.5pt; color: #000; }
 
+        @page {
+            header: html_MyHeader;
+            footer: html_MyFooter;
+            background-image: url("{{ $watermark_path }}");
+            background-image-resize: 6;
+            background-image-opacity: 0.1;
+            margin-top: 50mm;
+            margin-bottom: 25mm;
+            margin-footer: 10mm;
+        }
+
         .page { width: 100%; }
 
         table.main-table {
@@ -19,7 +30,15 @@
             vertical-align: middle;
         }
 
-        .header-row td { border-bottom: 1.5px solid #000; }
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #000;
+        }
+        .header-table td {
+            border: 1px solid #000;
+            padding: 3px 5px;
+        }
 
         .section-title {
             background-color: #d9e2f3;
@@ -63,12 +82,16 @@
         .firma-img { max-width: 200px; max-height: 80px; }
         .qr-img { width: 70px; height: 70px; }
 
-        .footer-trazabilidad {
-            margin-top: 8px;
-            border-top: 1px dashed #999;
-            padding-top: 4px;
-            font-size: 6.5pt;
-            color: #555;
+        .footer-table {
+            width: 100%;
+            font-size: 7.5pt;
+            color: #444;
+            border: none;
+        }
+        .footer-column {
+            width: 33.33%;
+            text-align: center;
+            vertical-align: top;
         }
 
         .legal-text { font-size: 7.5pt; text-align: justify; line-height: 1.4; }
@@ -78,59 +101,76 @@
 <body>
 
 @php
-    $logoAjar = str_replace('\\', '/', base_path('imagen/ajar.png.png'));
-    $logoRinval = str_replace('\\', '/', base_path('imagen/rinval.png.jfif'));
-    $logoDistmasivos = str_replace('\\', '/', base_path('imagen/distmasivos.png.jfif'));
+    $logoAjar = public_path('images/ajar.png');
+    $logoRinval = public_path('images/rinval.png');
+    $logoDistmasivos = public_path('images/distmasivos.png');
 @endphp
+
+<htmlpageheader name="MyHeader">
+    <table class="header-table">
+        <tr>
+            <td rowspan="4" style="width: 20%; text-align: center; vertical-align: top; padding: 6px 4px;">
+                <table style="width: 100%; border: none; margin: 0 auto;" class="no-border">
+                    <tr>
+                        <td style="text-align: center; padding: 3px; border: none; width: 33%;">
+                            <img src="{{ $logoAjar }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="AJAR">
+                        </td>
+                        <td style="text-align: center; padding: 3px; border: none; width: 33%;">
+                            <img src="{{ $logoRinval }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="RINVAL">
+                        </td>
+                        <td style="text-align: center; padding: 3px; border: none; width: 34%;">
+                            <img src="{{ $logoDistmasivos }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="DISTMASIVOS">
+                        </td>
+                    </tr>
+                </table>
+                <span class="text-small" style="display: block; margin-top: 4px;">{{ $empresa->direccion ?? '' }}</span>
+                <span class="text-small">{{ $empresa->correo ? 'Correo. ' . $empresa->correo : '' }}</span><br>
+                <span class="text-small">{{ $empresa->celular ? 'Celular. ' . $empresa->celular : '' }}</span>
+            </td>
+            <td rowspan="4" style="width: 50%; text-align: center; vertical-align: middle;">
+                <span style="font-size: 12pt; font-weight: bold;">CREACION O ACTUALIZACION DE<br>CLIENTE</span>
+            </td>
+            <td style="width: 15%;" class="field-label">Fecha:</td>
+            <td style="width: 15%;">23/10/2024</td>
+        </tr>
+        <tr>
+            <td class="field-label">Versión:</td>
+            <td>002</td>
+        </tr>
+        <tr>
+            <td class="field-label">Código:</td>
+            <td>CTA-FMT-001</td>
+        </tr>
+        <tr>
+            <td class="field-label">Página</td>
+            <td>{PAGENO} de {nbpg}</td>
+        </tr>
+    </table>
+</htmlpageheader>
+
+<htmlpagefooter name="MyFooter">
+    <table class="footer-table">
+        <tr>
+            <td class="footer-column">
+                <strong>Dirección:</strong><br>
+                Calle 16 #6-03<br>
+                Barrio Villa Johana
+            </td>
+            <td class="footer-column">
+                <strong>Correo:</strong><br>
+                cartera@distribucionesajar.com
+            </td>
+            <td class="footer-column">
+                <strong>Celular:</strong><br>
+                3172712559
+            </td>
+        </tr>
+    </table>
+</htmlpagefooter>
 
 {{-- ===================== PÁGINA 1 ===================== --}}
 <div class="page">
 <table class="main-table">
-    {{-- HEADER: 3 logos grupo R&V (margen izquierdo superior) --}}
-    <tr class="header-row">
-        <td rowspan="4" style="width: 20%; text-align: center; vertical-align: top; border-right: 1.5px solid #000; padding: 6px 4px;">
-            <table style="width: 100%; border: none; margin: 0 auto;" class="no-border">
-                <tr>
-                    <td style="text-align: center; padding: 3px; border: none; width: 33%;">
-                        @if(file_exists($logoAjar))
-                        <img src="{{ $logoAjar }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="AJAR">
-                        @endif
-                    </td>
-                    <td style="text-align: center; padding: 3px; border: none; width: 33%;">
-                        @if(file_exists($logoRinval))
-                        <img src="{{ $logoRinval }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="RINVAL">
-                        @endif
-                    </td>
-                    <td style="text-align: center; padding: 3px; border: none; width: 34%;">
-                        @if(file_exists($logoDistmasivos))
-                        <img src="{{ $logoDistmasivos }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="DISTMASIVOS">
-                        @endif
-                    </td>
-                </tr>
-            </table>
-            <span class="text-small" style="display: block; margin-top: 4px;">{{ $empresa->direccion ?? '' }}</span>
-            <span class="text-small">{{ $empresa->correo ? 'Correo. ' . $empresa->correo : '' }}</span><br>
-            <span class="text-small">{{ $empresa->celular ? 'Celular. ' . $empresa->celular : '' }}</span>
-        </td>
-        <td rowspan="4" style="width: 50%; text-align: center; vertical-align: middle; border-right: 1.5px solid #000;">
-            <span style="font-size: 12pt; font-weight: bold;">CREACION O ACTUALIZACION DE<br>CLIENTE</span>
-        </td>
-        <td style="width: 15%;" class="field-label">Fecha:</td>
-        <td style="width: 15%;">23/10/2024</td>
-    </tr>
-    <tr class="header-row">
-        <td class="field-label">Versión:</td>
-        <td>002</td>
-    </tr>
-    <tr class="header-row">
-        <td class="field-label">Código:</td>
-        <td>CTA-FMT-001</td>
-    </tr>
-    <tr class="header-row">
-        <td class="field-label">Página</td>
-        <td>1 de 2</td>
-    </tr>
-
     {{-- ASESOR Y ZONA --}}
     <tr>
         <td colspan="2" style="border-right: 1.5px solid #000;">
@@ -337,14 +377,6 @@
         </td>
     </tr>
 </table>
-
-{{-- FOOTER TRAZABILIDAD PÁG 1 --}}
-<div class="footer-trazabilidad">
-    ID Doc: CTA-FMT-001-{{ str_pad($cliente->id, 5, '0', STR_PAD_LEFT) }} |
-    Creado: {{ $cliente->created_at->format('d/m/Y H:i:s') }} |
-    Vendedor: {{ $vendedor->name ?? 'N/A' }} |
-    IP: {{ $cliente->ip_dispositivo ?? 'N/A' }}
-</div>
 </div>
 
 {{-- ===================== PÁGINA 2 ===================== --}}
@@ -352,51 +384,6 @@
 
 <div class="page">
 <table class="main-table">
-    {{-- HEADER PÁG 2: mismos 3 logos --}}
-    <tr class="header-row">
-        <td rowspan="4" style="width: 20%; text-align: center; vertical-align: top; border-right: 1.5px solid #000; padding: 6px 4px;">
-            <table style="width: 100%; border: none; margin: 0 auto;" class="no-border">
-                <tr>
-                    <td style="text-align: center; padding: 3px; border: none; width: 33%;">
-                        @if(file_exists($logoAjar))
-                        <img src="{{ $logoAjar }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="AJAR">
-                        @endif
-                    </td>
-                    <td style="text-align: center; padding: 3px; border: none; width: 33%;">
-                        @if(file_exists($logoRinval))
-                        <img src="{{ $logoRinval }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="RINVAL">
-                        @endif
-                    </td>
-                    <td style="text-align: center; padding: 3px; border: none; width: 34%;">
-                        @if(file_exists($logoDistmasivos))
-                        <img src="{{ $logoDistmasivos }}" style="max-height: 36px; max-width: 60px; object-fit: contain;" alt="DISTMASIVOS">
-                        @endif
-                    </td>
-                </tr>
-            </table>
-            <span class="text-small" style="display: block; margin-top: 4px;">{{ $empresa->direccion ?? '' }}</span>
-            <span class="text-small">{{ $empresa->correo ? 'Correo. ' . $empresa->correo : '' }}</span><br>
-            <span class="text-small">{{ $empresa->celular ? 'Celular. ' . $empresa->celular : '' }}</span>
-        </td>
-        <td rowspan="4" style="width: 50%; text-align: center; vertical-align: middle; border-right: 1.5px solid #000;">
-            <span style="font-size: 12pt; font-weight: bold;">CREACION O ACTUALIZACION DE<br>CLIENTE</span>
-        </td>
-        <td style="width: 15%;" class="field-label">Fecha:</td>
-        <td style="width: 15%;">23/10/2024</td>
-    </tr>
-    <tr class="header-row">
-        <td class="field-label">Versión:</td>
-        <td>002</td>
-    </tr>
-    <tr class="header-row">
-        <td class="field-label">Código:</td>
-        <td>CTA-FMT-001</td>
-    </tr>
-    <tr class="header-row">
-        <td class="field-label">Página</td>
-        <td>2 de 2</td>
-    </tr>
-
     {{-- CONSENTIMIENTO TRATAMIENTO DE DATOS PERSONALES --}}
     <tr>
         <td colspan="4" class="section-title">CONSENTIMIENTO PARA TRATAMIENTO DE DATOS PERSONALES</td>
@@ -505,24 +492,11 @@
     </tr>
 </table>
 
-{{-- FOOTER TRAZABILIDAD PÁG 2 --}}
-<div class="footer-trazabilidad">
-    <table style="width: 100%; border: none; font-size: 6.5pt; color: #555;">
-        <tr>
-            <td style="width: 75%; border: none; vertical-align: top; padding: 0;">
-                <strong>Creado por:</strong> {{ $vendedor->name ?? 'N/A' }}<br>
-                <strong>Fecha/Hora:</strong> {{ $cliente->created_at->format('d/m/Y H:i:s') }} | <strong>IP:</strong> {{ $cliente->ip_dispositivo ?? 'N/A' }}<br>
-                <strong>ID Doc:</strong> CTA-FMT-001-{{ str_pad($cliente->id, 5, '0', STR_PAD_LEFT) }}<br>
-                <strong>Hash:</strong> {{ $hashVerificacion ?? 'N/A' }}<br>
-                <strong>User-Agent:</strong> {{ Str::limit($cliente->user_agent_dispositivo ?? 'N/A', 80) }}
-            </td>
-            <td style="width: 25%; border: none; text-align: right; vertical-align: top; padding: 0;">
-                @if($qrBase64 ?? false)
-                    <img src="{{ $qrBase64 }}" style="width: 55px; height: 55px;" alt="QR">
-                @endif
-            </td>
-        </tr>
-    </table>
+<div class="footer-trazabilidad" style="margin-top: 10px; font-size: 6.5pt; color: #555;">
+    ID Doc: CTA-FMT-001-{{ str_pad($cliente->id, 5, '0', STR_PAD_LEFT) }} |
+    Creado: {{ $cliente->created_at->format('d/m/Y H:i:s') }} |
+    Vendedor: {{ $vendedor->name ?? 'N/A' }} |
+    IP: {{ $cliente->ip_dispositivo ?? 'N/A' }}
 </div>
 </div>
 
