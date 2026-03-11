@@ -172,6 +172,8 @@ class ClienteWizard extends Component
         $this->guardando = true;
 
         try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
             $cloudinary = app(CloudinaryService::class);
             $cedulaPdfUrl = null;
             $rutPdfUrl = null;
@@ -229,6 +231,7 @@ class ClienteWizard extends Component
                 'checklist_rut' => !empty($rutPdfUrl),
                 'persona_natural_no_responsable_iva' => $this->persona_natural_no_responsable_iva,
                 'cliente_contado' => $this->cliente_contado,
+                'observaciones' => $this->observaciones,
                 'ip_dispositivo' => request()->ip(),
                 'user_agent_dispositivo' => request()->userAgent(),
                 'estado' => 'completado',
@@ -238,6 +241,8 @@ class ClienteWizard extends Component
                 $cliente,
                 "Cliente {$cliente->nombre_razon_social} creado por " . Auth::user()->name
             );
+
+            \Illuminate\Support\Facades\DB::commit();
 
             try {
                 app(PdfClienteService::class)->generarYSubir($cliente);
@@ -250,6 +255,7 @@ class ClienteWizard extends Component
             $this->dispatch('cliente-guardado', clienteId: $cliente->id);
 
         } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
             logger()->error("Error guardando cliente: " . $e->getMessage());
             session()->flash('error', 'Error al guardar el cliente. Intente nuevamente.');
         } finally {
