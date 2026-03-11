@@ -49,6 +49,7 @@ class Cliente extends Model
         'rut_pdf_url',
         'persona_natural_no_responsable_iva',
         'cliente_contado',
+        'observaciones',
         'checklist_formato',
         'checklist_documento_identidad',
         'checklist_rut',
