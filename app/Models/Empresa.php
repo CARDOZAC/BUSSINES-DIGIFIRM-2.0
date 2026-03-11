@@ -41,6 +41,11 @@ class Empresa extends Model
         return $this->hasMany(Cliente::class, 'empresa_id');
     }
 
+    public function proveedores(): HasMany
+    {
+        return $this->hasMany(Proveedor::class, 'empresa_id');
+    }
+
     public function scopeActivas($query)
     {
         return $query->where('activa', true);

@@ -24,6 +24,11 @@
                        class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('clientes.crear') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
                         Nuevo Cliente
                     </a>
+                    <a href="{{ route('proveedores.index') }}"
+                       class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('proveedores.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block -mt-0.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                        Proveedores
+                    </a>
                     @if(Auth::user()->esAdminCartera() || Auth::user()->hasRole('super_admin'))
                     <a href="{{ route('admin.auditoria') }}"
                        class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.auditoria') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
@@ -94,6 +99,9 @@
             </a>
             <a href="{{ route('clientes.crear') }}" class="block px-3 py-2 text-sm rounded-lg {{ request()->routeIs('clientes.crear') ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-700' }}">
                 Nuevo Cliente
+            </a>
+            <a href="{{ route('proveedores.index') }}" class="block px-3 py-2 text-sm rounded-lg {{ request()->routeIs('proveedores.*') ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-700' }}">
+                Proveedores
             </a>
             @if(Auth::user()->esAdminCartera() || Auth::user()->hasRole('super_admin'))
             <a href="{{ route('admin.auditoria') }}" class="block px-3 py-2 text-sm rounded-lg {{ request()->routeIs('admin.auditoria') ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-700' }}">

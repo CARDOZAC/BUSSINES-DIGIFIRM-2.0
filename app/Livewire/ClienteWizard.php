@@ -21,6 +21,9 @@ class ClienteWizard extends Component
 
     // --- Paso 1: Empresa y Solicitud ---
     public ?int $empresa_id = null;
+    public ?int $proveedor_id = null;
+    public bool $tiene_codigo_unico = false;
+    public ?string $codigo_unico_registro = null;
     public string $tipo_solicitud = '';
     public string $fecha_diligenciamiento = '';
     public string $zona = '';
@@ -80,6 +83,14 @@ class ClienteWizard extends Component
     public function updatedEmpresaId(?int $valor): void
     {
         $this->empresaSeleccionada = $valor ? Empresa::find($valor) : null;
+        $this->proveedor_id = null;
+    }
+
+    public function updatedTieneCodigoUnico($valor): void
+    {
+        if (!$valor) {
+            $this->codigo_unico_registro = null;
+        }
     }
 
     public function updatedDocumentoCedulaPdf(): void
@@ -151,7 +162,12 @@ class ClienteWizard extends Component
 
         $this->validate(array_merge(
             $this->reglasDelPaso(4),
-            ['empresa_id' => 'required|exists:empresas,id']
+            [
+                'empresa_id' => 'required|exists:empresas,id',
+                'proveedor_id' => 'required|exists:proveedores,id',
+                'tiene_codigo_unico' => 'required|boolean',
+                'codigo_unico_registro' => 'required_if:tiene_codigo_unico,1|nullable|string|max:100',
+            ]
         ), $this->mensajesValidacion());
 
         if (!$this->confirmacion_datos) {
@@ -198,6 +214,9 @@ class ClienteWizard extends Component
 
             $cliente = Cliente::create([
                 'empresa_id' => $this->empresa_id,
+                'proveedor_id' => $this->proveedor_id,
+                'tiene_codigo_unico' => $this->tiene_codigo_unico,
+                'codigo_unico_registro' => (bool) $this->tiene_codigo_unico ? $this->codigo_unico_registro : null,
                 'vendedor_id' => Auth::id(),
                 'tipo_solicitud' => $this->tipo_solicitud,
                 'fecha_diligenciamiento' => $this->fecha_diligenciamiento,
@@ -274,6 +293,9 @@ class ClienteWizard extends Component
         return match ($paso) {
             1 => [
                 'empresa_id' => 'required|exists:empresas,id',
+                'proveedor_id' => 'required|exists:proveedores,id',
+                'tiene_codigo_unico' => 'required|boolean',
+                'codigo_unico_registro' => 'required_if:tiene_codigo_unico,1|nullable|string|max:100',
                 'tipo_solicitud' => 'required|in:creacion,actualizacion,reactivacion',
                 'fecha_diligenciamiento' => 'required|date',
                 'zona' => 'nullable|string|max:100',
@@ -319,6 +341,10 @@ class ClienteWizard extends Component
     {
         return [
             'empresa_id.required' => 'Seleccione la empresa.',
+            'proveedor_id.required' => 'Seleccione el proveedor.',
+            'proveedor_id.exists' => 'El proveedor seleccionado no es válido.',
+            'tiene_codigo_unico.required' => 'Indique si aplica código único de registro.',
+            'codigo_unico_registro.required_if' => 'El código único es obligatorio cuando aplica.',
             'empresa_id.exists' => 'La empresa seleccionada no es válida.',
             'tipo_solicitud.required' => 'Seleccione el tipo de solicitud.',
             'tipo_solicitud.in' => 'El tipo de solicitud no es válido.',
@@ -351,8 +377,14 @@ class ClienteWizard extends Component
 
     public function render()
     {
+        $empresaId = $this->empresa_id ?? Auth::user()->empresa_id;
+        $proveedores = $empresaId
+            ? \App\Models\Proveedor::where('empresa_id', $empresaId)->where('activo', true)->orderBy('nombre')->get()
+            : collect();
+
         return view('livewire.cliente-wizard', [
             'empresas' => Empresa::activas()->orderBy('nombre')->get(),
+            'proveedores' => $proveedores,
             'progresoPorcentaje' => $this->progresoPorcentaje,
         ])->layout('layouts.app');
     }

@@ -17,6 +17,7 @@ class Cliente extends Model
 
     protected $fillable = [
         'empresa_id',
+        'proveedor_id',
         'vendedor_id',
         'tipo_solicitud',
         'fecha_diligenciamiento',
@@ -65,6 +66,7 @@ class Cliente extends Model
     protected function casts(): array
     {
         return [
+            'tiene_codigo_unico' => 'boolean',
             'fecha_diligenciamiento' => 'date',
             'agente_retencion_fuente' => 'boolean',
             'agente_retencion_ico' => 'boolean',
@@ -91,6 +93,11 @@ class Cliente extends Model
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(Empresa::class, 'empresa_id');
+    }
+
+    public function proveedor(): BelongsTo
+    {
+        return $this->belongsTo(Proveedor::class, 'proveedor_id');
     }
 
     public function vendedor(): BelongsTo

@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::define('seleccionar-empresa', function ($user) {
+            return $user->hasAnyRole(['super_admin', 'admin-cartera']);
+        });
+
         Gate::policy(Cliente::class, ClientePolicy::class);
         Gate::policy(Empresa::class, EmpresaPolicy::class);
         Gate::policy(User::class, UserPolicy::class);

@@ -79,6 +79,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     {{-- Empresa --}}
+                    @can('seleccionar-empresa')
                     <div>
                         <label class="block text-sm font-medium mb-1">
                             Empresa <span class="text-error">*</span>
@@ -91,6 +92,52 @@
                         </select>
                         @error('empresa_id') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
+                    @else
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Empresa</label>
+                        <input type="text" class="input w-full bg-base-200" value="{{ auth()->user()->empresa->nombre ?? 'N/A' }}" disabled readonly>
+                        <small class="text-base-content/50 text-xs">Tu empresa asignada se asigna automáticamente.</small>
+                        @error('empresa_id') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    @endcan
+
+                    {{-- Proveedor --}}
+                    <div>
+                        <label class="block text-sm font-medium mb-1">
+                            Proveedor <span class="text-error">*</span>
+                        </label>
+                        <select wire:model="proveedor_id" class="select w-full" {{ !$empresa_id ? 'disabled' : '' }}>
+                            <option value="">-- Seleccione proveedor --</option>
+                            @foreach($proveedores as $prov)
+                                <option value="{{ $prov->id }}">{{ $prov->codigo_alterno }} - {{ $prov->nombre }}</option>
+                            @endforeach
+                        </select>
+                        <small class="text-base-content/50 text-xs">El proveedor se filtra según la empresa seleccionada.</small>
+                        @error('proveedor_id') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- ¿Aplica Código Único de Registro? --}}
+                    <div>
+                        <label class="block text-sm font-medium mb-1">
+                            ¿Aplica Código Único de Registro? <span class="text-error">*</span>
+                        </label>
+                        <select wire:model.live="tiene_codigo_unico" class="select w-full">
+                            <option value="0">No</option>
+                            <option value="1">Sí</option>
+                        </select>
+                        @error('tiene_codigo_unico') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    @if($tiene_codigo_unico)
+                    <div>
+                        <label class="block text-sm font-medium mb-1">
+                            Código Único de Registro <span class="text-error">*</span>
+                        </label>
+                        <input type="text" wire:model="codigo_unico_registro" class="input w-full" placeholder="Ingrese el código único" maxlength="100">
+                        <small class="text-base-content/50 text-xs">Este código identifica de forma única al cliente en el sistema del proveedor.</small>
+                        @error('codigo_unico_registro') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    @endif
 
                     {{-- Tipo solicitud --}}
                     <div>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClienteDocumentoController;
 use App\Http\Controllers\ClientePdfController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProveedorController;
 use App\Livewire\ClienteWizard;
 use App\Livewire\Admin\AuditoriaIndex;
 use App\Livewire\Admin\UsuarioIndex;
@@ -34,6 +35,19 @@ Route::get('/logos/{filename}', function (string $filename) {
 Route::middleware(['auth', 'verified', 'empresa.access'])->group(function () {
     Route::get('/dashboard', DashboardHome::class)->name('dashboard');
     Route::get('/clientes', TablaClientes::class)->name('clientes.index');
+
+    Route::prefix('proveedores')->name('proveedores.')->group(function () {
+        Route::get('/', [ProveedorController::class, 'index'])->name('index');
+        Route::get('/crear', [ProveedorController::class, 'create'])->name('create');
+        Route::post('/', [ProveedorController::class, 'store'])->name('store');
+        Route::get('/lista-dropdown', [ProveedorController::class, 'listaDropdown'])->name('dropdown');
+        Route::get('/plantilla-csv', [ProveedorController::class, 'plantillaCsv'])->name('plantilla');
+        Route::get('/exportar', [ProveedorController::class, 'export'])->name('export');
+        Route::post('/importar', [ProveedorController::class, 'import'])->name('import');
+        Route::get('/{id}/editar', [ProveedorController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ProveedorController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ProveedorController::class, 'destroy'])->name('destroy');
+    });
     Route::get('/clientes/nuevo', ClienteWizard::class)->name('clientes.crear');
     Route::get('/clientes/{id}/pdf/ver', [ClientePdfController::class, 'ver'])->name('clientes.pdf.ver');
     Route::get('/clientes/{id}/pdf/descargar', [ClientePdfController::class, 'descargar'])->name('clientes.pdf.descargar');
