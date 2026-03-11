@@ -41,7 +41,8 @@ EXPOSE 80
 
 # 11. Comando de inicio: Limpia cachés de Laravel y arranca Apache
 # El flag --force es por si decides correr migraciones aquí
-CMD php artisan config:clear && \
+CMD php artisan migrate --force && \
+    php artisan config:clear && \
     php artisan view:clear && \
     php artisan route:clear && \
     apache2-foreground
