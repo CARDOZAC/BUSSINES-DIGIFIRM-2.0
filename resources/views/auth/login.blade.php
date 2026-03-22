@@ -69,7 +69,7 @@
                 <div>
                     <label for="password" class="block text-xs font-medium text-gray-600 mb-1.5">Contraseña</label>
                     <div class="relative" x-data="{ show: false }">
-                        <input id="password" name="password" :type="show ? 'text' : 'password'" required autocomplete="current-password"
+                        <input id="password" name="password" type="password" x-bind:type="show ? 'text' : 'password'" required autocomplete="current-password"
                                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:ring-2 focus:ring-gray-200 outline-none transition-all duration-300 pr-12"
                                placeholder="••••••••">
                         <button type="button" x-on:click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
