@@ -736,4 +736,34 @@
             animation: fadeIn 0.3s ease-out;
         }
     </style>
+
+    {{-- Script para captura de geolocalización --}}
+    @script
+    <script>
+        $wire.on('cliente-guardado', () => {
+            // Opcional: acciones tras guardado
+        });
+
+        // Intentar capturar ubicación al cargar el componente
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    $wire.set('latitud', position.coords.latitude);
+                    $wire.set('longitud', position.coords.longitude);
+                    console.log('Ubicación capturada:', position.coords.latitude, position.coords.longitude);
+                },
+                function(error) {
+                    console.warn('Error al obtener ubicación:', error.message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            console.warn('Geolocalización no disponible en este navegador');
+        }
+    </script>
+    @endscript
 </div>
