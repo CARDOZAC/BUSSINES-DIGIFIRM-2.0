@@ -63,6 +63,10 @@ class ClienteWizard extends Component
     public string $observaciones = '';
     public bool $confirmacion_datos = false;
 
+    // --- Geolocalización ---
+    public ?float $latitud = null;
+    public ?float $longitud = null;
+
     // --- Estado UI ---
     public ?Empresa $empresaSeleccionada = null;
     public bool $guardando = false;
@@ -253,12 +257,16 @@ class ClienteWizard extends Component
                 'observaciones' => $this->observaciones,
                 'ip_dispositivo' => request()->ip(),
                 'user_agent_dispositivo' => request()->userAgent(),
+                'latitud' => $this->latitud,
+                'longitud' => $this->longitud,
                 'estado' => 'completado',
             ]);
 
             app(ActivityLogService::class)->registrarCreacion(
                 $cliente,
-                "Cliente {$cliente->nombre_razon_social} creado por " . Auth::user()->name
+                "Cliente {$cliente->nombre_razon_social} creado por " . Auth::user()->name,
+                $this->latitud,
+                $this->longitud
             );
 
             \Illuminate\Support\Facades\DB::commit();

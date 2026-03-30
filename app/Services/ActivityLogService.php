@@ -62,9 +62,15 @@ class ActivityLogService
         );
     }
 
-    public function registrarCreacion(Model $modelo, ?string $descripcion = null): ActivityLog
+    public function registrarCreacion(Model $modelo, ?string $descripcion = null, ?float $latitud = null, ?float $longitud = null): ActivityLog
     {
         $modulo = $this->moduloDelModelo($modelo);
+
+        $ciudad = null;
+        $pais = null;
+        if ($latitud && $longitud) {
+            [$ciudad, $pais] = $this->reverseGeocode($latitud, $longitud);
+        }
 
         return ActivityLog::registrar(
             accion: 'crear',
@@ -73,12 +79,22 @@ class ActivityLogService
             descripcion: $descripcion ?? "Se creó {$this->nombreModelo($modelo)} #{$modelo->getKey()}",
             datosNuevos: $modelo->toArray(),
             modulo: $modulo,
+            latitud: $latitud,
+            longitud: $longitud,
+            ciudad: $ciudad,
+            pais: $pais,
         );
     }
 
-    public function registrarActualizacion(Model $modelo, array $datosAnteriores, ?string $descripcion = null): ActivityLog
+    public function registrarActualizacion(Model $modelo, array $datosAnteriores, ?string $descripcion = null, ?float $latitud = null, ?float $longitud = null): ActivityLog
     {
         $modulo = $this->moduloDelModelo($modelo);
+
+        $ciudad = null;
+        $pais = null;
+        if ($latitud && $longitud) {
+            [$ciudad, $pais] = $this->reverseGeocode($latitud, $longitud);
+        }
 
         return ActivityLog::registrar(
             accion: 'actualizar',
@@ -88,6 +104,10 @@ class ActivityLogService
             datosAnteriores: $datosAnteriores,
             datosNuevos: $modelo->getChanges(),
             modulo: $modulo,
+            latitud: $latitud,
+            longitud: $longitud,
+            ciudad: $ciudad,
+            pais: $pais,
         );
     }
 
