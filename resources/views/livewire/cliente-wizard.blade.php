@@ -6,6 +6,10 @@
                 @if($empresaSeleccionada && $empresaSeleccionada->logo_path)
                     <img src="{{ asset($empresaSeleccionada->logo_path) }}"
                          alt="{{ $empresaSeleccionada->nombre }}"
+                         width="40"
+                         height="40"
+                         fetchpriority="high"
+                         loading="eager"
                          class="h-10 w-10 rounded-full bg-gray-100 p-0.5 object-contain border border-gray-200">
                 @else
                     <div class="h-10 w-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center">
@@ -106,7 +110,7 @@
                         <label class="block text-sm font-medium mb-1">
                             Proveedor <span class="text-error">*</span>
                         </label>
-                        <select wire:model="proveedor_id" class="select w-full" {{ !$empresa_id ? 'disabled' : '' }}>
+                        <select wire:model.live="proveedor_id" class="select w-full" {{ !$empresa_id ? 'disabled' : '' }}>
                             <option value="">-- Seleccione proveedor --</option>
                             @foreach($proveedores as $prov)
                                 <option value="{{ $prov->id }}">{{ $prov->codigo_alterno }} - {{ $prov->nombre }}</option>
@@ -203,7 +207,7 @@
                         <label class="block text-sm font-medium mb-1">
                             Tipo de Documento <span class="text-error">*</span>
                         </label>
-                        <select wire:model="tipo_documento" class="select w-full">
+                        <select wire:model.live="tipo_documento" class="select w-full">
                             <option value="">Seleccione...</option>
                             <option value="CC">Cédula de Ciudadanía</option>
                             <option value="NIT">NIT</option>
@@ -216,7 +220,7 @@
                         <label class="block text-sm font-medium mb-1">
                             Número de Documento <span class="text-error">*</span>
                         </label>
-                        <input type="text" wire:model="numero_documento" class="input w-full" placeholder="Ej: 1234567890" />
+                        <input type="text" wire:model.blur="numero_documento" class="input w-full" placeholder="Ej: 1234567890" />
                         @error('numero_documento') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -224,7 +228,7 @@
                         <label class="block text-sm font-medium mb-1">
                             Nombre / Razón Social <span class="text-error">*</span>
                         </label>
-                        <input type="text" wire:model="nombre_razon_social" class="input w-full" placeholder="Nombre completo o razón social" />
+                        <input type="text" wire:model.blur="nombre_razon_social" class="input w-full" placeholder="Nombre completo o razón social" />
                         @error('nombre_razon_social') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -234,13 +238,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Nombre del Establecimiento</label>
-                        <input type="text" wire:model="nombre_establecimiento" class="input w-full" placeholder="Nombre comercial" />
+                        <input type="text" wire:model.blur="nombre_establecimiento" class="input w-full" placeholder="Nombre comercial" />
                         @error('nombre_establecimiento') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium mb-1">Correo Electrónico</label>
-                        <input type="email" wire:model="correo_electronico" class="input w-full" placeholder="correo@ejemplo.com" />
+                        <input type="email" wire:model.blur="correo_electronico" class="input w-full" placeholder="correo@ejemplo.com" />
                         @error('correo_electronico') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -248,13 +252,13 @@
                         <label class="block text-sm font-medium mb-1">
                             Dirección <span class="text-error">*</span>
                         </label>
-                        <input type="text" wire:model="direccion" class="input w-full" placeholder="Calle, carrera, número..." />
+                        <input type="text" wire:model.blur="direccion" class="input w-full" placeholder="Calle, carrera, número..." />
                         @error('direccion') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium mb-1">Barrio</label>
-                        <input type="text" wire:model="barrio" class="input w-full" placeholder="Nombre del barrio" />
+                        <input type="text" wire:model.blur="barrio" class="input w-full" placeholder="Nombre del barrio" />
                         @error('barrio') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -262,7 +266,7 @@
                         <label class="block text-sm font-medium mb-1">
                             Ciudad / Departamento <span class="text-error">*</span>
                         </label>
-                        <input type="text" wire:model="ciudad_departamento" class="input w-full" placeholder="Ej: Bogotá, Cundinamarca" />
+                        <input type="text" wire:model.blur="ciudad_departamento" class="input w-full" placeholder="Ej: Bogotá, Cundinamarca" />
                         @error('ciudad_departamento') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -270,7 +274,7 @@
                         <label class="block text-sm font-medium mb-1">
                             Celular <span class="text-error">*</span>
                         </label>
-                        <input type="tel" wire:model="celular" class="input w-full" placeholder="3001234567" />
+                        <input type="tel" wire:model.blur="celular" class="input w-full" placeholder="3001234567" />
                         @error('celular') <p class="text-error text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>

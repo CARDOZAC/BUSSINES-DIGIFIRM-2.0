@@ -386,12 +386,24 @@ class ClienteWizard extends Component
     public function render()
     {
         $empresaId = $this->empresa_id ?? Auth::user()->empresa_id;
+
+        // Caché de proveedores por empresa para reducir latencia en Livewire
         $proveedores = $empresaId
-            ? \App\Models\Proveedor::where('empresa_id', $empresaId)->where('activo', true)->orderBy('nombre')->get()
+            ? \Illuminate\Support\Facades\Cache::remember("proveedores_empresa_{$empresaId}", 1800, function () use ($empresaId) {
+                return \App\Models\Proveedor::where('empresa_id', $empresaId)
+                    ->where('activo', true)
+                    ->orderBy('nombre')
+                    ->get();
+            })
             : collect();
 
+        // Caché de empresas activas (bajo esfuerzo, alto impacto en re-renders)
+        $empresas = \Illuminate\Support\Facades\Cache::remember('empresas_activas', 3600, function () {
+            return Empresa::activas()->orderBy('nombre')->get();
+        });
+
         return view('livewire.cliente-wizard', [
-            'empresas' => Empresa::activas()->orderBy('nombre')->get(),
+            'empresas' => $empresas,
             'proveedores' => $proveedores,
             'progresoPorcentaje' => $this->progresoPorcentaje,
         ])->layout('layouts.app');
